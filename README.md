@@ -8,3 +8,9 @@
 | 月之暗面 moonshot | moonshot-v1-8k | | 12 元 | 12 元 | 8k | - | - | 动态 |
 | 月之暗面 moonshot | moonshot-v1-32k | | 24 元 | 24 元 | 32k |  - | - | 动态 |
 | 月之暗面 moonshot | moonshot-v1-128k | | 60 元 | 60 元 | 128k | - | - | 动态 |
+| 百度文心一言 | ERNIE-4.0-8K | | 120 元 | 120 元 | 8k | 5k | 2k |
+| 百度文心一言 | ERNIE-Speed-8K | | 免费 | 免费 | 8k | 5k | 2k |
+| 百度文心一言 | ERNIE-Speed-128K | | 免费 | 免费 | 128k | - | 4k | 不保障SLA |
+| 百度文心一言 | ERNIE-Lite-4K | | 免费 | 免费 | 4k | - | 1k | |
+| 百度文心一言 | ERNIE-Lite-8K | | 免费 | 免费 | 8k | - | 1k | |
+| 百度文心一言 | ERNIE-Lite-128K | | 免费 | 免费 | 128k | - | 2k | |
