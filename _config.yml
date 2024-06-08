@@ -1,2 +1,11 @@
-theme: minima
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: jekyll/minima
+minima:
+  skin: solarized
+
 google_analytics: G-WZ0K1GPGHJ
+
+feed:
+  path: https://github.com/flanker/llmprice.cn
