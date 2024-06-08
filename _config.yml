@@ -1,11 +1,21 @@
 plugins:
   - jekyll-remote-theme
+  - jekyll-seo-tag
 
 remote_theme: jekyll/minima
 minima:
   skin: solarized
 
+description: >
+  这个文档的目的是对比国内外各个厂商的大模型，主要针对文本生成类模型。
+  包括：OpenAI GPT-4o，Anthropic Claude 3，Google Gemini，
+  阿里通义千问，百度文心一言，字节豆包，腾讯混元，
+  月之暗面Moonshot，百川，智谱，MiniMax，零一万物 等。
+
 google_analytics: G-WZ0K1GPGHJ
 
 feed:
   path: https://github.com/flanker/llmprice.cn
+
+titles_from_headings:
+  strip_title: true
