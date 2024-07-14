@@ -25,6 +25,7 @@
 | 厂商 | 模型 | 输入价格 | 输出价格 | 上下文 Token 长度 | 最大输入 Token | 最大输出 Token |
 |----|----|----|----|----|----|----|
 | OpenAI | gpt-4o | 35元 ($5) | 105元 ($15) | 128k | - | 4k |
+| Anthropic | Claude 3.5 Sonnet | 21元 ($3) | 105元 ($15) | 200k | - | 4k |
 | Anthropic | Claude 3 Opus | 105元 ($15) | 525元 ($75) | 200k | - | 4k |
 | Anthropic | Claude 3 Sonnet | 21元 ($3) | 105元 ($15) | 200k | - | 4k |
 | Anthropic | Claude 3 Haiku | 1.75元 ($0.25) | 8.75元 ($1.25) | 200k | - | 4k |
