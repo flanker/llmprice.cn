@@ -25,8 +25,9 @@
 | 厂商 | 模型 | 输入价格 | 输出价格 | 上下文 Token 长度 | 最大输入 Token | 最大输出 Token |
 |----|----|----|----|----|----|----|
 | OpenAI | gpt-4o | 35元 ($5) | 105元 ($15) | 128k | - | 4k |
+| OpenAI | gpt-4o-2024-08-06 | 17.5元 ($2.5) | 70元 ($10) | 128k | - | 16k |
 | OpenAI | gpt-4o-mini | 1.05元 ($0.15) | 4.2元 ($0.6) | 128k | - | 16k |
-| Anthropic | Claude 3.5 Sonnet | 21元 ($3) | 105元 ($15) | 200k | - | 4k |
+| Anthropic | Claude 3.5 Sonnet | 21元 ($3) | 105元 ($15) | 200k | - | 8k/4k |
 | Anthropic | Claude 3 Opus | 105元 ($15) | 525元 ($75) | 200k | - | 4k |
 | Anthropic | Claude 3 Sonnet | 21元 ($3) | 105元 ($15) | 200k | - | 4k |
 | Anthropic | Claude 3 Haiku | 1.75元 ($0.25) | 8.75元 ($1.25) | 200k | - | 4k |
@@ -39,12 +40,12 @@
 | 百度文心一言 | ERNIE-Lite-4K | 免费 | 免费 | 4k | - | 1k |
 | 百度文心一言 | ERNIE-Lite-8K | 免费 | 免费 | 8k | - | 1k |
 | 百度文心一言 | ERNIE-Lite-128K | 免费 | 免费 | 128k | - | 2k |
-| 字节豆包 | Doubao-pro-4k | 0.8 | 2 | 4k | - | - |
-| 字节豆包 | Doubao-pro-32k | 0.8 | 2 | 32k | - | - |
-| 字节豆包 | Doubao-pro-128k | 5 | 9 | 128k | - | - |
-| 字节豆包 | Doubao-lite-4k | 0.3 | 0.6 | 4k | - | - |
-| 字节豆包 | Doubao-lite-32k | 0.3 | 0.6 | 32k | - | - |
-| 字节豆包 | Doubao-lite-128k | 0.8 | 1 | 128k | - | - |
+| 字节豆包 | Doubao-pro-4k | 0.8 | 2 | 4k | - | 4k |
+| 字节豆包 | Doubao-pro-32k | 0.8 | 2 | 32k | - | 4k |
+| 字节豆包 | Doubao-pro-128k | 5 | 9 | 128k | - | 4k |
+| 字节豆包 | Doubao-lite-4k | 0.3 | 0.6 | 4k | - | 4k |
+| 字节豆包 | Doubao-lite-32k | 0.3 | 0.6 | 32k | - | 4k |
+| 字节豆包 | Doubao-lite-128k | 0.8 | 1 | 128k | - | 4k |
 | 月之暗面 | moonshot-v1-8k | 12 元 | 12 元 | 8k | - | - |
 | 月之暗面 | moonshot-v1-32k | 24 元 | 24 元 | 32k |  - | - |
 | 月之暗面 | moonshot-v1-128k | 60 元 | 60 元 | 128k | - | - |
