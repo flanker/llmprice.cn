@@ -46,6 +46,7 @@
 | 字节豆包     | Doubao-lite-32k      | 0.3             | 0.6           | 32k               | -              | 4k             |
 | 字节豆包     | Doubao-lite-128k     | 0.8             | 1             | 128k              | -              | 4k             |
 | Deepseek    | deepseek-chat       | 2               | 8             | 64K               | -              | 8K             |
+| Deepseek    | deepseek-reasoner   | 4               | 16            | 64K               | -              | 8K             |
 | 月之暗面     | moonshot-v1-8k       | 12 元           | 12 元         | 8k                | -              | -              |
 | 月之暗面     | moonshot-v1-32k      | 24 元           | 24 元         | 32k               | -              | -              |
 | 月之暗面     | moonshot-v1-128k     | 60 元           | 60 元         | 128k              | -              | -              |
