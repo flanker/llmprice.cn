@@ -24,29 +24,31 @@
 
 | 厂商         | 模型                 | 输入价格        | 输出价格      | 上下文 Token 长度 | 最大输入 Token | 最大输出 Token |
 | ------------ | -------------------- | --------------- | ------------- | ----------------- | -------------- | -------------- |
+| OpenAI       | gpt-4.5              | 525 元 ($75)    | 1050 元 ($150)| 128k              | -              | 16k            |
 | OpenAI       | gpt-4o               | 17.5 元 ($2.5)  | 70 元 ($10)   | 128k              | -              | 16k            |
 | OpenAI       | gpt-4o-mini          | 1.05 元 ($0.15) | 4.2 元 ($0.6) | 128k              | -              | 16k            |
 | OpenAI       | o1                   | 105 元 ($15)    | 420 元 ($60)  | 128k              | -              | 32k            |
 | OpenAI       | o3-mini              | 7.7 元 ($1.1)   | 30.8 元 ($4.4)| 128k              | -              | 32k            |
+| Anthropic    | Claude 3.7 Sonnet    | 21 元 ($3)      | 105 元 ($15)  | 200k              | -              | 8k             |
 | Anthropic    | Claude 3.5 Sonnet    | 21 元 ($3)      | 105 元 ($15)  | 200k              | -              | 8k             |
 | Anthropic    | Claude 3.5 Haiku     | 5.6 元 ($0.8)   | 28 元 ($4)    | 200k              | -              | 8k             |
 | Anthropic    | Claude 3 Opus        | 105 元 ($15)    | 525 元 ($75)  | 200k              | -              | 4k             |
-| 阿里通义千问 | qwen-max             | 20 元           | 60 元         | 32k               | 30k            | 8k             |
-| 阿里通义千问 | qwen-plus            | 0.8 元          | 2 元          | 128k              | 126k           | 8k             |
-| 阿里通义千问 | qwen-turbo           | 0.3 元          | 0.6 元        | 1000k             | 1000k          | 8k             |
-| 阿里通义千问 | qwq-32b-preview      | 3.5 元          | 7 元          | 32k               | 30k            | 16             |
-| 字节豆包     | Doubao-1.5-pro-32k   | 0.8             | 2             | 32k               | -              | 4k             |
-| 字节豆包     | Doubao-1.5-pro-256k  | 5               | 9             | 256k              | -              | 4k             |
-| 字节豆包     | Doubao-1.5-lite-32k  | 0.3             | 0.6           | 32k              | -              | 4k             |
-| 字节豆包     | Doubao-pro-4k        | 0.8             | 2             | 4k                | -              | 4k             |
-| 字节豆包     | Doubao-pro-32k       | 0.8             | 2             | 32k               | -              | 4k             |
-| 字节豆包     | Doubao-pro-128k      | 5               | 9             | 128k              | -              | 4k             |
-| 字节豆包     | Doubao-pro-256k      | 5               | 9             | 256k              | -              | 4k             |
-| 字节豆包     | Doubao-lite-4k       | 0.3             | 0.6           | 4k                | -              | 4k             |
-| 字节豆包     | Doubao-lite-32k      | 0.3             | 0.6           | 32k               | -              | 4k             |
-| 字节豆包     | Doubao-lite-128k     | 0.8             | 1             | 128k              | -              | 4k             |
-| Deepseek    | deepseek-chat       | 2               | 8             | 64K               | -              | 8K             |
-| Deepseek    | deepseek-reasoner   | 4               | 16            | 64K               | -              | 8K             |
+| 阿里通义千问   | qwen-max             | 20 元           | 60 元         | 32k               | 30k            | 8k             |
+| 阿里通义千问   | qwen-plus            | 0.8 元          | 2 元          | 128k              | 126k           | 8k             |
+| 阿里通义千问   | qwen-turbo           | 0.3 元          | 0.6 元        | 1000k             | 1000k          | 8k             |
+| 阿里通义千问   | qwq-32b-preview      | 3.5 元          | 7 元          | 32k               | 30k            | 16             |
+| 字节豆包      | Doubao-1.5-pro-32k   | 0.8             | 2             | 32k               | -              | 4k             |
+| 字节豆包      | Doubao-1.5-pro-256k  | 5               | 9             | 256k              | -              | 4k             |
+| 字节豆包      | Doubao-1.5-lite-32k  | 0.3             | 0.6           | 32k              | -              | 4k             |
+| 字节豆包      | Doubao-pro-4k        | 0.8             | 2             | 4k                | -              | 4k             |
+| 字节豆包      | Doubao-pro-32k       | 0.8             | 2             | 32k               | -              | 4k             |
+| 字节豆包      | Doubao-pro-128k      | 5               | 9             | 128k              | -              | 4k             |
+| 字节豆包      | Doubao-pro-256k      | 5               | 9             | 256k              | -              | 4k             |
+| 字节豆包      | Doubao-lite-4k       | 0.3             | 0.6           | 4k                | -              | 4k             |
+| 字节豆包      | Doubao-lite-32k      | 0.3             | 0.6           | 32k               | -              | 4k             |
+| 字节豆包      | Doubao-lite-128k     | 0.8             | 1             | 128k              | -              | 4k             |
+| Deepseek    | deepseek-chat(v3)     | 2               | 8             | 64K               | -              | 8K             |
+| Deepseek    | deepseek-reasoner(r1) | 4               | 16            | 64K               | -              | 8K             |
 | 月之暗面     | moonshot-v1-8k       | 12 元           | 12 元         | 8k                | -              | -              |
 | 月之暗面     | moonshot-v1-32k      | 24 元           | 24 元         | 32k               | -              | -              |
 | 月之暗面     | moonshot-v1-128k     | 60 元           | 60 元         | 128k              | -              | -              |
