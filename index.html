@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM 大模型价格对比 - llmprice.cn</title>
+    <meta name="description" content="国内外主流大模型 API 价格对比，包括 OpenAI、Anthropic、Google、阿里通义千问、字节豆包等">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --bg-primary: #fafbfc;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --border-light: #f3f4f6;
+            --accent-blue: #2563eb;
+            --accent-blue-light: #dbeafe;
+            --accent-green: #10b981;
+            --accent-green-light: #d1fae5;
+            --accent-orange: #f59e0b;
+            --accent-orange-light: #fef3c7;
+            --accent-purple: #8b5cf6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        /* Reset & Base */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 48px 0 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 0.875rem;
+            color: var(--text-tertiary);
+        }
+
+        .meta-info span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-info svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .toolbar-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Filter Tags */
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+
+        .filter-tag:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .filter-tag.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        /* Search & Sort */
+        .search-sort {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            width: 220px;
+            background: var(--bg-primary);
+            transition: all var(--transition-fast);
+            font-family: inherit;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-tertiary);
+        }
+
+        .sort-select {
+            padding: 10px 36px 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            background: var(--bg-primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+        }
+
+        /* Main Content */
+        main {
+            padding: 40px 0 80px;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 24px;
+        }
+
+        /* Provider Card */
+        .provider-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .provider-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: transparent;
+        }
+
+        .provider-card.hidden {
+            display: none;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation */
+        .provider-card:nth-child(1) { animation-delay: 0.05s; }
+        .provider-card:nth-child(2) { animation-delay: 0.1s; }
+        .provider-card:nth-child(3) { animation-delay: 0.15s; }
+        .provider-card:nth-child(4) { animation-delay: 0.2s; }
+        .provider-card:nth-child(5) { animation-delay: 0.25s; }
+        .provider-card:nth-child(6) { animation-delay: 0.3s; }
+        .provider-card:nth-child(7) { animation-delay: 0.35s; }
+        .provider-card:nth-child(8) { animation-delay: 0.4s; }
+        .provider-card:nth-child(9) { animation-delay: 0.45s; }
+        .provider-card:nth-child(10) { animation-delay: 0.5s; }
+        .provider-card:nth-child(11) { animation-delay: 0.55s; }
+
+        /* Card Header */
+        .card-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .provider-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .provider-info {
+            flex: 1;
+        }
+
+        .provider-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .provider-category {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .model-count {
+            padding: 4px 10px;
+            background: var(--bg-primary);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Card Table */
+        .card-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .card-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .card-table td {
+            padding: 14px 16px;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+
+        .card-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .card-table tbody tr {
+            transition: background var(--transition-fast);
+        }
+
+        .card-table tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        .model-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .price-input {
+            color: var(--accent-green);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .price-output {
+            color: var(--accent-orange);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .price-free {
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .context-length {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .price-usd {
+            color: var(--text-tertiary);
+            font-size: 0.7rem;
+            margin-left: 4px;
+        }
+
+        /* Price Bar Visualization */
+        .price-bar {
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .price-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width var(--transition-normal);
+        }
+
+        .price-bar-fill.input {
+            background: linear-gradient(90deg, var(--accent-green), #34d399);
+        }
+
+        .price-bar-fill.output {
+            background: linear-gradient(90deg, var(--accent-orange), #fbbf24);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color var(--transition-fast);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        .github-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--text-primary);
+            color: white;
+            border-radius: 100px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .github-link:hover {
+            background: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .github-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Provider Colors */
+        .logo-openai { background: linear-gradient(135deg, #10a37f, #0d8c6d); }
+        .logo-anthropic { background: linear-gradient(135deg, #d97706, #b45309); }
+        .logo-google { background: linear-gradient(135deg, #4285f4, #2563eb); }
+        .logo-deepseek { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .logo-alibaba { background: linear-gradient(135deg, #ff6a00, #ee4d2d); }
+        .logo-bytedance { background: linear-gradient(135deg, #00d9ff, #0099cc); }
+        .logo-moonshot { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+        .logo-baichuan { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .logo-zhipu { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .logo-yi { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+        .logo-baidu { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .toolbar-inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-tags {
+                justify-content: center;
+            }
+
+            .search-sort {
+                justify-content: center;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            header {
+                padding: 32px 0;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            .card-header {
+                padding: 16px;
+            }
+
+            .card-table th,
+            .card-table td {
+                padding: 10px 12px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* No results message */
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .no-results svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .no-results p {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>LLM 大模型价格对比</h1>
+            <p>国内外主流大语言模型 API 价格一览，帮你选择最适合的模型</p>
+            <div class="meta-info">
+                <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    更新于 2026-01-29
+                </span>
+                <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    汇率：$1 = ¥7
+                </span>
+                <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    价格单位：元/百万 Token
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <div class="toolbar">
+        <div class="container">
+            <div class="toolbar-inner">
+                <div class="filter-tags">
+                    <button class="filter-tag active" data-filter="all">全部</button>
+                    <button class="filter-tag" data-filter="foreign">国外</button>
+                    <button class="filter-tag" data-filter="domestic-major">国内大厂</button>
+                    <button class="filter-tag" data-filter="startup">初创公司</button>
+                </div>
+                <div class="search-sort">
+                    <div class="search-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="search-input" placeholder="搜索模型...">
+                    </div>
+                    <select class="sort-select" id="sort-select">
+                        <option value="default">默认排序</option>
+                        <option value="input-asc">输入价格 ↑</option>
+                        <option value="input-desc">输入价格 ↓</option>
+                        <option value="output-asc">输出价格 ↑</option>
+                        <option value="output-desc">输出价格 ↓</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="container">
+            <div class="card-grid" id="card-grid">
+                <!-- Cards will be generated by JavaScript -->
+            </div>
+            <div class="no-results" id="no-results" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                <p>没有找到匹配的模型</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="https://openai.com/api/pricing/" target="_blank">OpenAI</a>
+                    <a href="https://claude.com/pricing" target="_blank">Anthropic</a>
+                    <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank">Google</a>
+                    <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">Deepseek</a>
+                    <a href="https://help.aliyun.com/zh/model-studio/model-pricing" target="_blank">阿里云</a>
+                    <a href="https://www.volcengine.com/docs/82379/1544106" target="_blank">火山引擎</a>
+                    <a href="https://platform.moonshot.cn/docs/pricing/chat" target="_blank">月之暗面</a>
+                    <a href="https://platform.baichuan-ai.com/price" target="_blank">百川智能</a>
+                    <a href="https://bigmodel.cn/pricing" target="_blank">智谱</a>
+                    <a href="https://platform.lingyiwanwu.com/docs" target="_blank">零一万物</a>
+                    <a href="https://cloud.baidu.com/doc/WENXINWORKSHOP/s/clntwmv7t" target="_blank">百度</a>
+                </div>
+                <a href="https://github.com/flanker/llmprice.cn" target="_blank" class="github-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Price data from README.md
+        const providersData = [
+            {
+                name: 'OpenAI',
+                category: 'foreign',
+                categoryLabel: '国外',
+                logoClass: 'logo-openai',
+                logoText: 'O',
+                models: [
+                    { name: 'GPT-5.2', inputPrice: 12.25, outputPrice: 98, inputUsd: 1.75, outputUsd: 14, context: '128k', maxInput: '-', maxOutput: '16k' },
+                    { name: 'GPT-5 mini', inputPrice: 1.75, outputPrice: 14, inputUsd: 0.25, outputUsd: 2, context: '128k', maxInput: '-', maxOutput: '16k' },
+                    { name: 'GPT-4.1', inputPrice: 14, outputPrice: 56, inputUsd: 2, outputUsd: 8, context: '1M', maxInput: '-', maxOutput: '32k' },
+                    { name: 'GPT-4.1 mini', inputPrice: 5.6, outputPrice: 22.4, inputUsd: 0.8, outputUsd: 3.2, context: '1M', maxInput: '-', maxOutput: '32k' },
+                    { name: 'o3', inputPrice: 14, outputPrice: 56, inputUsd: 2, outputUsd: 8, context: '200k', maxInput: '-', maxOutput: '100k' },
+                    { name: 'o3-mini', inputPrice: 7.7, outputPrice: 30.8, inputUsd: 1.1, outputUsd: 4.4, context: '200k', maxInput: '-', maxOutput: '100k' }
+                ]
+            },
+            {
+                name: 'Anthropic',
+                category: 'foreign',
+                categoryLabel: '国外',
+                logoClass: 'logo-anthropic',
+                logoText: 'A',
+                models: [
+                    { name: 'Claude Opus 4.5', inputPrice: 35, outputPrice: 175, inputUsd: 5, outputUsd: 25, context: '200k', maxInput: '-', maxOutput: '32k' },
+                    { name: 'Claude Sonnet 4.5', inputPrice: 21, outputPrice: 105, inputUsd: 3, outputUsd: 15, context: '200k', maxInput: '-', maxOutput: '64k' },
+                    { name: 'Claude Haiku 4.5', inputPrice: 7, outputPrice: 35, inputUsd: 1, outputUsd: 5, context: '200k', maxInput: '-', maxOutput: '8k' }
+                ]
+            },
+            {
+                name: 'Google',
+                category: 'foreign',
+                categoryLabel: '国外',
+                logoClass: 'logo-google',
+                logoText: 'G',
+                models: [
+                    { name: 'Gemini 2.5 Pro', inputPrice: 8.75, outputPrice: 70, inputUsd: 1.25, outputUsd: 10, context: '1M', maxInput: '-', maxOutput: '64k' },
+                    { name: 'Gemini 2.5 Flash', inputPrice: 1.05, outputPrice: 4.2, inputUsd: 0.15, outputUsd: 0.6, context: '1M', maxInput: '-', maxOutput: '64k' },
+                    { name: 'Gemini 2.0 Flash-Lite', inputPrice: 0.525, outputPrice: 2.1, inputUsd: 0.075, outputUsd: 0.3, context: '1M', maxInput: '-', maxOutput: '8k' }
+                ]
+            },
+            {
+                name: 'Deepseek',
+                category: 'startup',
+                categoryLabel: '初创公司',
+                logoClass: 'logo-deepseek',
+                logoText: 'D',
+                models: [
+                    { name: 'deepseek-chat', inputPrice: 1.96, outputPrice: 2.94, inputUsd: 0.28, outputUsd: 0.42, context: '128k', maxInput: '-', maxOutput: '8k' },
+                    { name: 'deepseek-reasoner', inputPrice: 1.96, outputPrice: 2.94, inputUsd: 0.28, outputUsd: 0.42, context: '128k', maxInput: '-', maxOutput: '64k' }
+                ]
+            },
+            {
+                name: '阿里通义千问',
+                category: 'domestic-major',
+                categoryLabel: '国内大厂',
+                logoClass: 'logo-alibaba',
+                logoText: '阿',
+                models: [
+                    { name: 'qwen3-max', inputPrice: 2.5, outputPrice: 10, context: '252k', maxInput: '250k', maxOutput: '16k' },
+                    { name: 'qwen-max', inputPrice: 2.4, outputPrice: 9.6, context: '32k', maxInput: '30k', maxOutput: '8k' },
+                    { name: 'qwen-plus', inputPrice: 0.8, outputPrice: 2, context: '1M', maxInput: '1M', maxOutput: '8k' },
+                    { name: 'qwen-turbo', inputPrice: 0.3, outputPrice: 0.6, context: '1M', maxInput: '1M', maxOutput: '8k' }
+                ]
+            },
+            {
+                name: '字节豆包',
+                category: 'domestic-major',
+                categoryLabel: '国内大厂',
+                logoClass: 'logo-bytedance',
+                logoText: '豆',
+                models: [
+                    { name: 'Doubao-1.5-pro-32k', inputPrice: 0.8, outputPrice: 2, context: '32k', maxInput: '-', maxOutput: '4k' },
+                    { name: 'Doubao-1.5-pro-128k', inputPrice: 5, outputPrice: 9, context: '128k', maxInput: '-', maxOutput: '4k' },
+                    { name: 'Doubao-1.5-lite-32k', inputPrice: 0.3, outputPrice: 0.6, context: '32k', maxInput: '-', maxOutput: '4k' },
+                    { name: 'Doubao-1.5-lite-128k', inputPrice: 0.8, outputPrice: 1, context: '128k', maxInput: '-', maxOutput: '4k' }
+                ]
+            },
+            {
+                name: '月之暗面',
+                category: 'startup',
+                categoryLabel: '初创公司',
+                logoClass: 'logo-moonshot',
+                logoText: '月',
+                models: [
+                    { name: 'Kimi K2', inputPrice: 1, outputPrice: 1, context: '256k', maxInput: '-', maxOutput: '-' },
+                    { name: 'moonshot-v1-8k', inputPrice: 12, outputPrice: 12, context: '8k', maxInput: '-', maxOutput: '-' },
+                    { name: 'moonshot-v1-32k', inputPrice: 24, outputPrice: 24, context: '32k', maxInput: '-', maxOutput: '-' },
+                    { name: 'moonshot-v1-128k', inputPrice: 60, outputPrice: 60, context: '128k', maxInput: '-', maxOutput: '-' }
+                ]
+            },
+            {
+                name: '百川智能',
+                category: 'startup',
+                categoryLabel: '初创公司',
+                logoClass: 'logo-baichuan',
+                logoText: '百',
+                models: [
+                    { name: 'Baichuan-M3-Plus', inputPrice: 30, outputPrice: 30, context: '32k', maxInput: '-', maxOutput: '2k' },
+                    { name: 'Baichuan4-Turbo', inputPrice: 15, outputPrice: 15, context: '32k', maxInput: '-', maxOutput: '2k' },
+                    { name: 'Baichuan4-Air', inputPrice: 0.98, outputPrice: 0.98, context: '32k', maxInput: '-', maxOutput: '2k' }
+                ]
+            },
+            {
+                name: '智谱',
+                category: 'startup',
+                categoryLabel: '初创公司',
+                logoClass: 'logo-zhipu',
+                logoText: '智',
+                models: [
+                    { name: 'GLM-4.7', inputPrice: 5, outputPrice: 5, context: '128k', maxInput: '-', maxOutput: '8k' },
+                    { name: 'GLM-4-Plus', inputPrice: 5, outputPrice: 5, context: '128k', maxInput: '-', maxOutput: '8k' },
+                    { name: 'GLM-4-Flash', inputPrice: 0, outputPrice: 0, isFree: true, context: '128k', maxInput: '-', maxOutput: '8k' },
+                    { name: 'GLM-4-FlashX', inputPrice: 0.1, outputPrice: 0.1, context: '128k', maxInput: '-', maxOutput: '8k' }
+                ]
+            },
+            {
+                name: '零一万物',
+                category: 'startup',
+                categoryLabel: '初创公司',
+                logoClass: 'logo-yi',
+                logoText: '零',
+                models: [
+                    { name: 'yi-lightning', inputPrice: 1, outputPrice: 1, context: '16k', maxInput: '-', maxOutput: '-' },
+                    { name: 'yi-large', inputPrice: 20, outputPrice: 20, context: '32k', maxInput: '-', maxOutput: '-' }
+                ]
+            },
+            {
+                name: '百度文心',
+                category: 'domestic-major',
+                categoryLabel: '国内大厂',
+                logoClass: 'logo-baidu',
+                logoText: '度',
+                models: [
+                    { name: 'ERNIE-4.0-Turbo-8K', inputPrice: 30, outputPrice: 60, context: '8k', maxInput: '5k', maxOutput: '2k' },
+                    { name: 'ERNIE-Speed-8K', inputPrice: 0, outputPrice: 0, isFree: true, context: '8k', maxInput: '5k', maxOutput: '2k' },
+                    { name: 'ERNIE-Lite-8K', inputPrice: 0, outputPrice: 0, isFree: true, context: '8k', maxInput: '-', maxOutput: '1k' }
+                ]
+            }
+        ];
+
+        // Calculate max prices for bar visualization
+        let maxInputPrice = 0;
+        let maxOutputPrice = 0;
+        providersData.forEach(provider => {
+            provider.models.forEach(model => {
+                if (!model.isFree) {
+                    maxInputPrice = Math.max(maxInputPrice, model.inputPrice);
+                    maxOutputPrice = Math.max(maxOutputPrice, model.outputPrice);
+                }
+            });
+        });
+
+        // Render functions
+        function renderCard(provider) {
+            const modelRows = provider.models.map(model => {
+                const inputBarWidth = model.isFree ? 0 : (model.inputPrice / maxInputPrice * 100);
+                const outputBarWidth = model.isFree ? 0 : (model.outputPrice / maxOutputPrice * 100);
+
+                let inputPriceHtml, outputPriceHtml;
+                if (model.isFree) {
+                    inputPriceHtml = '<span class="price-free">免费</span>';
+                    outputPriceHtml = '<span class="price-free">免费</span>';
+                } else {
+                    const inputUsdText = model.inputUsd ? `<span class="price-usd">($${model.inputUsd})</span>` : '';
+                    const outputUsdText = model.outputUsd ? `<span class="price-usd">($${model.outputUsd})</span>` : '';
+                    inputPriceHtml = `
+                        <span class="price-input">${model.inputPrice}元</span>${inputUsdText}
+                        <div class="price-bar"><div class="price-bar-fill input" style="width: ${inputBarWidth}%"></div></div>
+                    `;
+                    outputPriceHtml = `
+                        <span class="price-output">${model.outputPrice}元</span>${outputUsdText}
+                        <div class="price-bar"><div class="price-bar-fill output" style="width: ${outputBarWidth}%"></div></div>
+                    `;
+                }
+
+                return `
+                    <tr data-model-name="${model.name.toLowerCase()}">
+                        <td><span class="model-name">${model.name}</span></td>
+                        <td>${inputPriceHtml}</td>
+                        <td>${outputPriceHtml}</td>
+                        <td><span class="context-length">${model.context}</span></td>
+                    </tr>
+                `;
+            }).join('');
+
+            return `
+                <div class="provider-card" data-category="${provider.category}" data-provider="${provider.name.toLowerCase()}">
+                    <div class="card-header">
+                        <div class="provider-logo ${provider.logoClass}">${provider.logoText}</div>
+                        <div class="provider-info">
+                            <div class="provider-name">${provider.name}</div>
+                            <div class="provider-category">${provider.categoryLabel}</div>
+                        </div>
+                        <span class="model-count">${provider.models.length} 个模型</span>
+                    </div>
+                    <table class="card-table">
+                        <thead>
+                            <tr>
+                                <th>模型</th>
+                                <th>输入价格</th>
+                                <th>输出价格</th>
+                                <th>上下文</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${modelRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderAllCards() {
+            const grid = document.getElementById('card-grid');
+            grid.innerHTML = providersData.map(renderCard).join('');
+        }
+
+        // Filter functionality
+        function filterCards() {
+            const activeFilter = document.querySelector('.filter-tag.active').dataset.filter;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const cards = document.querySelectorAll('.provider-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const category = card.dataset.category;
+                const providerName = card.dataset.provider;
+                const modelNames = Array.from(card.querySelectorAll('[data-model-name]')).map(el => el.dataset.modelName);
+
+                // Category filter
+                let categoryMatch = activeFilter === 'all' || category === activeFilter;
+
+                // Search filter
+                let searchMatch = true;
+                if (searchTerm) {
+                    const nameMatch = providerName.includes(searchTerm);
+                    const modelMatch = modelNames.some(name => name.includes(searchTerm));
+                    searchMatch = nameMatch || modelMatch;
+
+                    // Highlight matching rows
+                    card.querySelectorAll('tbody tr').forEach(row => {
+                        const modelName = row.dataset.modelName;
+                        if (modelName && modelName.includes(searchTerm)) {
+                            row.style.background = 'var(--accent-blue-light)';
+                        } else {
+                            row.style.background = '';
+                        }
+                    });
+                } else {
+                    card.querySelectorAll('tbody tr').forEach(row => {
+                        row.style.background = '';
+                    });
+                }
+
+                if (categoryMatch && searchMatch) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Show/hide no results message
+            document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // Sort functionality
+        function sortCards() {
+            const sortValue = document.getElementById('sort-select').value;
+            const grid = document.getElementById('card-grid');
+            const cards = Array.from(grid.querySelectorAll('.provider-card'));
+
+            if (sortValue === 'default') {
+                // Reset to original order
+                renderAllCards();
+                filterCards();
+                return;
+            }
+
+            cards.sort((a, b) => {
+                const aProvider = providersData.find(p => p.name.toLowerCase() === a.dataset.provider);
+                const bProvider = providersData.find(p => p.name.toLowerCase() === b.dataset.provider);
+
+                // Get min non-free price for comparison
+                const getMinPrice = (provider, type) => {
+                    const prices = provider.models
+                        .filter(m => !m.isFree)
+                        .map(m => type === 'input' ? m.inputPrice : m.outputPrice);
+                    return prices.length > 0 ? Math.min(...prices) : Infinity;
+                };
+
+                let aPrice, bPrice;
+                if (sortValue.startsWith('input')) {
+                    aPrice = getMinPrice(aProvider, 'input');
+                    bPrice = getMinPrice(bProvider, 'input');
+                } else {
+                    aPrice = getMinPrice(aProvider, 'output');
+                    bPrice = getMinPrice(bProvider, 'output');
+                }
+
+                if (sortValue.endsWith('asc')) {
+                    return aPrice - bPrice;
+                } else {
+                    return bPrice - aPrice;
+                }
+            });
+
+            cards.forEach(card => grid.appendChild(card));
+        }
+
+        // Event listeners
+        document.querySelectorAll('.filter-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                tag.classList.add('active');
+                filterCards();
+            });
+        });
+
+        document.getElementById('search-input').addEventListener('input', filterCards);
+        document.getElementById('sort-select').addEventListener('change', sortCards);
+
+        // Initialize
+        renderAllCards();
+    </script>
+</body>
+</html>
