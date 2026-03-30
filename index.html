@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM 大模型价格对比 - llmprice.cn</title>
-    <meta name="description" content="国内外主流大模型 API 价格对比，包括 OpenAI、Anthropic、Google、阿里通义千问、字节豆包等">
+    <meta name="description" content="基于 LiteLLM 全量模型配置，实时对比主流 LLM 文本模型 API 价格">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563eb'/%3E%3Cpath d='M18 20h10v24h18v8H18z' fill='white'/%3E%3C/svg%3E">
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* CSS Variables */
         :root {
             --bg-primary: #fafbfc;
             --bg-card: #ffffff;
@@ -29,20 +28,17 @@
             --text-secondary: #6b7280;
             --text-tertiary: #9ca3af;
             --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --radius-sm: 6px;
             --radius-md: 12px;
             --radius-lg: 16px;
-            --radius-xl: 24px;
             --transition-fast: 150ms ease;
             --transition-normal: 250ms ease;
-            --transition-slow: 350ms ease;
         }
 
-        /* Reset & Base */
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -60,8 +56,10 @@
             min-height: 100vh;
         }
 
-        /* Typography */
-        h1, h2, h3, h4 {
+        h1,
+        h2,
+        h3,
+        h4 {
             font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
             font-weight: 600;
             line-height: 1.3;
@@ -71,14 +69,12 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Layout */
         .container {
-            max-width: 1400px;
+            max-width: 1440px;
             margin: 0 auto;
             padding: 0 24px;
         }
 
-        /* Header */
         header {
             background: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
@@ -96,8 +92,8 @@
 
         header p {
             color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
+            font-size: 1.05rem;
+            max-width: 860px;
             margin: 0 auto 20px;
         }
 
@@ -121,16 +117,47 @@
             height: 16px;
         }
 
-        /* Toolbar */
+        .meta-info a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px dashed currentColor;
+        }
+
+        .meta-info a:hover {
+            color: var(--accent-blue);
+        }
+
+        .exchange-rate-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exchange-rate-input {
+            width: 88px;
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .exchange-rate-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+        }
+
         .toolbar {
-            background: var(--bg-card);
+            background: rgba(255, 255, 255, 0.95);
             border-bottom: 1px solid var(--border-color);
             padding: 20px 0;
             position: sticky;
             top: 0;
             z-index: 100;
             backdrop-filter: blur(8px);
-            background: rgba(255, 255, 255, 0.95);
         }
 
         .toolbar-inner {
@@ -141,7 +168,6 @@
             justify-content: space-between;
         }
 
-        /* Filter Tags */
         .filter-tags {
             display: flex;
             gap: 8px;
@@ -172,11 +198,17 @@
             color: white;
         }
 
-        /* Search & Sort */
         .search-sort {
             display: flex;
             gap: 12px;
             align-items: center;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .search-box {
@@ -188,7 +220,7 @@
             border: 1px solid var(--border-color);
             border-radius: 100px;
             font-size: 0.875rem;
-            width: 220px;
+            width: 260px;
             background: var(--bg-primary);
             transition: all var(--transition-fast);
             font-family: inherit;
@@ -230,19 +262,526 @@
             box-shadow: 0 0 0 3px var(--accent-blue-light);
         }
 
-        /* Main Content */
+        .filter-toggle,
+        .ghost-button {
+            padding: 10px 16px;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+        }
+
+        .filter-toggle:hover,
+        .ghost-button:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            transform: translateY(-1px);
+        }
+
+        .filter-toggle:disabled,
+        .ghost-button:disabled {
+            opacity: 0.48;
+            cursor: not-allowed;
+            transform: none;
+            border-color: var(--border-color);
+            color: var(--text-tertiary);
+        }
+
+        .filter-toggle.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .toolbar-filter-summary {
+            margin-top: 16px;
+            display: none;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-filter-summary.active {
+            display: flex;
+        }
+
+        .toolbar-filter-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .toolbar-filter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            background: var(--accent-blue-light);
+            color: var(--accent-blue);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .toolbar-filter-chip:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent-blue);
+        }
+
+        .toolbar-filter-chip-close {
+            font-size: 0.92rem;
+            line-height: 1;
+        }
+
+        .provider-filter-dropdown-wrap {
+            position: relative;
+        }
+
+        .provider-filter-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: min(420px, calc(100vw - 48px));
+            padding: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(18px);
+            display: none;
+            z-index: 240;
+        }
+
+        .provider-filter-dropdown.open {
+            display: block;
+        }
+
+        .provider-filter-dropdown-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .provider-filter-dropdown-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .provider-filter-dropdown-subtitle {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--text-tertiary);
+        }
+
+        .provider-filter-search {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .provider-filter-search-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .provider-filter-search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            background: var(--bg-primary);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .provider-filter-search-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+        }
+
+        .provider-filter-dropdown .panel-actions {
+            padding: 14px 0 0;
+            margin-top: 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .provider-filter-dropdown .model-filter-results-panel {
+            padding: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .model-filter-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.44);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-fast);
+            z-index: 300;
+        }
+
+        .model-filter-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .model-filter-modal {
+            width: min(1080px, 100%);
+            max-height: min(760px, calc(100vh - 48px));
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 24px;
+            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.24);
+        }
+
+        .model-filter-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 22px 24px 0;
+        }
+
+        .model-filter-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .model-filter-subtitle,
+        .selection-summary {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+
+        .model-filter-subtitle {
+            padding: 0 24px;
+            margin-top: 10px;
+        }
+
+        .selection-summary {
+            text-align: right;
+        }
+
+        .selection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--accent-blue-light);
+            color: var(--accent-blue);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .model-filter-body {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 18px 24px 0;
+            min-height: 0;
+            flex: 1;
+        }
+
+        .model-filter-input-pane,
+        .model-filter-results-pane {
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .model-filter-input-pane {
+            flex: 0 0 320px;
+        }
+
+        .model-filter-results-pane {
+            flex: 1;
+        }
+
+        .model-filter-pane-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .model-filter-textarea {
+            width: 100%;
+            min-height: 128px;
+            resize: vertical;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all var(--transition-fast);
+        }
+
+        .model-filter-textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px var(--accent-blue-light);
+            background: var(--bg-card);
+        }
+
+        .model-filter-results-panel {
+            min-height: 0;
+            flex: 1;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(255, 255, 255, 0.95));
+        }
+
+        .model-filter-results-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        .model-filter-results-list {
+            max-height: 420px;
+            overflow: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .model-filter-option {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid transparent;
+            background: rgba(248, 250, 252, 0.9);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .model-filter-option:hover {
+            border-color: rgba(37, 99, 235, 0.2);
+            background: rgba(239, 246, 255, 0.9);
+        }
+
+        .model-filter-option input {
+            margin-top: 2px;
+        }
+
+        .model-filter-option-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .model-filter-option-provider {
+            font-size: 0.76rem;
+            color: var(--text-tertiary);
+        }
+
+        .model-filter-empty {
+            padding: 18px 16px;
+            border-radius: 14px;
+            border: 1px dashed var(--border-color);
+            color: var(--text-tertiary);
+            background: rgba(255, 255, 255, 0.92);
+            line-height: 1.6;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding: 18px 24px 24px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .panel-actions .ghost-button {
+            justify-content: center;
+        }
+
+        .ghost-button.subtle {
+            background: transparent;
+        }
+
+        .dialog-close {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 1.1rem;
+        }
+
+        .dialog-close:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            transform: rotate(90deg);
+        }
+
+        body.dialog-open {
+            overflow: hidden;
+        }
+
+        .ghost-button.primary {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            color: white;
+        }
+
+        .ghost-button.primary:hover {
+            color: white;
+            border-color: var(--accent-blue);
+            background: var(--accent-blue);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .status-banner {
+            padding: 16px 0 0;
+        }
+
+        .status-banner-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-pill.live {
+            background: var(--accent-green-light);
+            color: #047857;
+        }
+
+        .status-pill.loading {
+            background: var(--accent-blue-light);
+            color: var(--accent-blue);
+        }
+
+        .status-pill.snapshot {
+            background: var(--accent-orange-light);
+            color: #b45309;
+        }
+
         main {
             padding: 40px 0 80px;
         }
 
-        /* Card Grid */
+        .loading-state {
+            text-align: center;
+            padding: 72px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .loading-state svg {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 16px;
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 0.45;
+                transform: scale(0.95);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
             gap: 24px;
         }
 
-        /* Provider Card */
         .provider-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -251,7 +790,7 @@
             transition: all var(--transition-normal);
             opacity: 0;
             transform: translateY(20px);
-            animation: fadeInUp 0.5s ease forwards;
+            animation: fadeInUp 0.45s ease forwards;
         }
 
         .provider-card:hover {
@@ -271,26 +810,37 @@
             }
         }
 
-        /* Stagger animation */
-        .provider-card:nth-child(1) { animation-delay: 0.05s; }
-        .provider-card:nth-child(2) { animation-delay: 0.1s; }
-        .provider-card:nth-child(3) { animation-delay: 0.15s; }
-        .provider-card:nth-child(4) { animation-delay: 0.2s; }
-        .provider-card:nth-child(5) { animation-delay: 0.25s; }
-        .provider-card:nth-child(6) { animation-delay: 0.3s; }
-        .provider-card:nth-child(7) { animation-delay: 0.35s; }
-        .provider-card:nth-child(8) { animation-delay: 0.4s; }
-        .provider-card:nth-child(9) { animation-delay: 0.45s; }
-        .provider-card:nth-child(10) { animation-delay: 0.5s; }
-        .provider-card:nth-child(11) { animation-delay: 0.55s; }
-
-        /* Card Header */
         .card-header {
             padding: 20px 24px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 16px;
+            flex-wrap: wrap;
             border-bottom: 1px solid var(--border-light);
+        }
+
+        .provider-card.collapsed .card-header {
+            border-bottom: none;
+        }
+
+        .provider-card.collapsed .provider-card-body {
+            display: none;
+        }
+
+        .card-header-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .provider-logo {
@@ -301,7 +851,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: 1rem;
             color: white;
             flex-shrink: 0;
         }
@@ -311,9 +861,15 @@
         }
 
         .provider-name {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 600;
             margin-bottom: 2px;
+        }
+
+        .provider-company {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
         }
 
         .provider-category {
@@ -332,7 +888,41 @@
             font-weight: 500;
         }
 
-        /* Card Table */
+        .card-collapse-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+        }
+
+        .card-collapse-toggle:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .card-collapse-icon {
+            width: 14px;
+            height: 14px;
+            transition: transform var(--transition-fast);
+        }
+
+        .provider-card.collapsed .card-collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .provider-card-body {
+            display: block;
+        }
+
         .card-table {
             width: 100%;
             border-collapse: collapse;
@@ -369,9 +959,36 @@
             background: var(--bg-primary);
         }
 
+        .card-table tbody tr.model-row-hidden {
+            display: none;
+        }
+
+        .model-select-col,
+        .model-select-cell {
+            width: 52px;
+            text-align: center;
+        }
+
+        .model-select {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+
         .model-name {
-            font-weight: 500;
+            display: block;
+            font-weight: 600;
             color: var(--text-primary);
+            margin-bottom: 2px;
+            word-break: break-word;
+        }
+
+        .model-key {
+            display: block;
+            color: var(--text-tertiary);
+            font-size: 0.7rem;
+            word-break: break-all;
         }
 
         .price-input {
@@ -405,7 +1022,6 @@
             margin-left: 4px;
         }
 
-        /* Price Bar Visualization */
         .price-bar {
             height: 4px;
             background: var(--border-light);
@@ -428,7 +1044,6 @@
             background: linear-gradient(90deg, var(--accent-orange), #fbbf24);
         }
 
-        /* Footer */
         footer {
             background: var(--bg-card);
             border-top: 1px solid var(--border-color);
@@ -484,20 +1099,23 @@
             height: 18px;
         }
 
-        /* Provider Colors */
-        .logo-openai { background: linear-gradient(135deg, #10a37f, #0d8c6d); }
-        .logo-anthropic { background: linear-gradient(135deg, #d97706, #b45309); }
-        .logo-google { background: linear-gradient(135deg, #4285f4, #2563eb); }
-        .logo-deepseek { background: linear-gradient(135deg, #6366f1, #4f46e5); }
-        .logo-alibaba { background: linear-gradient(135deg, #ff6a00, #ee4d2d); }
-        .logo-bytedance { background: linear-gradient(135deg, #00d9ff, #0099cc); }
-        .logo-moonshot { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
-        .logo-baichuan { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .logo-zhipu { background: linear-gradient(135deg, #14b8a6, #0d9488); }
-        .logo-yi { background: linear-gradient(135deg, #f43f5e, #e11d48); }
-        .logo-baidu { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-tertiary);
+        }
 
-        /* Responsive */
+        .no-results svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .no-results p {
+            font-size: 1.1rem;
+        }
+
         @media (max-width: 900px) {
             .card-grid {
                 grid-template-columns: 1fr;
@@ -512,15 +1130,37 @@
                 align-items: stretch;
             }
 
-            .filter-tags {
-                justify-content: center;
-            }
-
+            .filter-tags,
             .search-sort {
                 justify-content: center;
             }
 
+            .toolbar-actions,
+            .model-filter-body,
+            .model-filter-header,
+            .model-filter-results-header,
+            .panel-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
             .search-box input {
+                width: 100%;
+            }
+
+            .model-filter-backdrop {
+                padding: 12px;
+            }
+
+            .selection-summary {
+                text-align: left;
+            }
+
+            .model-filter-input-pane {
+                flex-basis: auto;
+            }
+
+            .panel-actions .ghost-button {
                 width: 100%;
             }
         }
@@ -551,24 +1191,10 @@
                 flex-direction: column;
                 text-align: center;
             }
-        }
 
-        /* No results message */
-        .no-results {
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--text-tertiary);
-        }
-
-        .no-results svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .no-results p {
-            font-size: 1.1rem;
+            .status-banner-inner {
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -576,15 +1202,31 @@
     <header>
         <div class="container">
             <h1>LLM 大模型价格对比</h1>
-            <p>国内外主流大语言模型 API 价格一览，帮你选择最适合的模型</p>
+            <p>直接使用 LiteLLM 的完整模型配置，实时展示全部可定价 chat 模型，并按 provider 自动分组。页面优先加载本地缓存，再刷新远端最新数据。</p>
             <div class="meta-info">
                 <span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    更新于 2026-01-29
+                    数据时间 <span id="updated-at">加载中</span>
+                </span>
+                <span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="M4 9h16"></path><path d="M9 4v16"></path></svg>
+                    数据源：<a href="https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json" target="_blank" rel="noreferrer">LiteLLM Cost Map</a>
                 </span>
                 <span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                    汇率：$1 = ¥7
+                    <span class="exchange-rate-control">
+                        <label for="exchange-rate-input">汇率：$1 = ¥</label>
+                        <input
+                            id="exchange-rate-input"
+                            class="exchange-rate-input"
+                            type="number"
+                            min="0.0001"
+                            step="0.01"
+                            inputmode="decimal"
+                            value="7"
+                            aria-label="美元兑人民币汇率"
+                        >
+                    </span>
                 </span>
                 <span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -599,35 +1241,142 @@
             <div class="toolbar-inner">
                 <div class="filter-tags">
                     <button class="filter-tag active" data-filter="all">全部</button>
-                    <button class="filter-tag" data-filter="foreign">国外</button>
-                    <button class="filter-tag" data-filter="domestic-major">国内大厂</button>
-                    <button class="filter-tag" data-filter="startup">初创公司</button>
+                    <button class="filter-tag" data-filter="official">官方/直连</button>
+                    <button class="filter-tag" data-filter="cloud">云平台</button>
+                    <button class="filter-tag" data-filter="platform">聚合/托管</button>
                 </div>
-                <div class="search-sort">
-                    <div class="search-box">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="search-input" placeholder="搜索模型...">
+                <div class="toolbar-actions">
+                    <div class="search-sort">
+                        <div class="search-box">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input type="text" id="search-input" placeholder="搜索 provider 或模型 key...">
+                        </div>
+                        <select class="sort-select" id="sort-select">
+                            <option value="default">默认排序</option>
+                            <option value="input-asc">输入价格 ↑</option>
+                            <option value="input-desc">输入价格 ↓</option>
+                            <option value="output-asc">输出价格 ↑</option>
+                            <option value="output-desc">输出价格 ↓</option>
+                        </select>
                     </div>
-                    <select class="sort-select" id="sort-select">
-                        <option value="default">默认排序</option>
-                        <option value="input-asc">输入价格 ↑</option>
-                        <option value="input-desc">输入价格 ↓</option>
-                        <option value="output-asc">输出价格 ↑</option>
-                        <option value="output-desc">输出价格 ↓</option>
-                    </select>
+                    <div class="provider-filter-dropdown-wrap" id="provider-filter-wrap">
+                        <button class="filter-toggle" id="provider-filter-toggle" type="button" aria-expanded="false">
+                            厂家过滤
+                        </button>
+                        <div class="provider-filter-dropdown" id="provider-filter-panel" aria-hidden="true">
+                            <div class="provider-filter-dropdown-header">
+                                <div>
+                                    <div class="provider-filter-dropdown-title">厂家过滤</div>
+                                    <div class="provider-filter-dropdown-subtitle" id="provider-filter-selection-summary">待下发 0 个厂家</div>
+                                </div>
+                                <button class="dialog-close" id="close-provider-filter" type="button" aria-label="关闭厂家过滤下拉">×</button>
+                            </div>
+                            <div class="provider-filter-search">
+                                <label class="provider-filter-search-label" for="provider-filter-search">搜索厂家</label>
+                                <input
+                                    id="provider-filter-search"
+                                    class="provider-filter-search-input"
+                                    type="text"
+                                    placeholder="搜索厂家名称 / provider id"
+                                >
+                            </div>
+                            <div class="model-filter-results-panel">
+                                <div class="model-filter-results-header">
+                                    <div class="selection-badge" id="provider-filter-match-badge">全部厂家</div>
+                                    <div class="selection-summary" id="provider-filter-results-summary">下拉勾选后点击“下发厂家过滤”，顶部会展示当前生效的厂家标签。</div>
+                                </div>
+                                <div class="model-filter-results-list" id="provider-filter-results"></div>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="ghost-button primary" id="apply-provider-filter" type="button">下发厂家过滤</button>
+                                <button class="ghost-button" id="clear-provider-filter" type="button">清空过滤</button>
+                                <button class="ghost-button subtle" id="cancel-provider-filter" type="button">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="filter-toggle" id="model-filter-toggle" type="button" aria-expanded="false">
+                        模型 ID 过滤
+                    </button>
+                    <button class="ghost-button subtle" id="expand-all-provider-cards" type="button">全部展开</button>
+                    <button class="ghost-button subtle" id="collapse-all-provider-cards" type="button">全部收起</button>
                 </div>
+            </div>
+            <div class="toolbar-filter-summary" id="active-provider-filter-summary">
+                <span class="toolbar-filter-label">已选厂家</span>
+                <div class="toolbar-filter-tags" id="active-provider-filter-tags"></div>
+                <button class="ghost-button subtle" id="clear-active-provider-filter" type="button">清空</button>
+            </div>
+            <div class="toolbar-filter-summary" id="active-model-filter-summary">
+                <span class="toolbar-filter-label">已下发模型过滤</span>
+                <div class="toolbar-filter-tags" id="active-model-filter-tags"></div>
+                <button class="ghost-button subtle" id="clear-active-model-filter" type="button">清空</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="model-filter-backdrop" id="model-filter-panel" aria-hidden="true">
+        <div class="model-filter-modal" role="dialog" aria-modal="true" aria-labelledby="model-filter-dialog-title">
+            <div class="model-filter-header">
+                <div>
+                    <div class="model-filter-title" id="model-filter-dialog-title">按模型 ID 关键词筛选</div>
+                    <div class="selection-summary">
+                        <div class="selection-badge" id="model-filter-badge">已输入 0 行关键词</div>
+                        <div id="model-selection-summary">待下发 0 个模型</div>
+                    </div>
+                </div>
+                <button class="dialog-close" id="close-model-filter" type="button" aria-label="关闭模型过滤弹窗">×</button>
+            </div>
+            <div class="model-filter-subtitle">
+                每行输入一个关键词，实时匹配模型 ID。勾选需要的模型后再下发，已下发的模型会在顶部以标签形式展示。
+            </div>
+            <div class="model-filter-body">
+                <div class="model-filter-input-pane">
+                    <label class="model-filter-pane-label" for="model-filter-input">关键词输入</label>
+                    <textarea
+                        id="model-filter-input"
+                        class="model-filter-textarea"
+                        placeholder="示例：&#10;gpt-4.1&#10;claude-3-7&#10;deepseek-chat"
+                    ></textarea>
+                </div>
+                <div class="model-filter-results-pane">
+                    <div class="model-filter-pane-label">匹配结果</div>
+                    <div class="model-filter-results-panel">
+                        <div class="model-filter-results-header">
+                            <div class="selection-badge" id="model-filter-match-badge">等待输入关键词</div>
+                            <div class="selection-summary" id="model-filter-results-summary">每行关键词会匹配包含该片段的模型 ID</div>
+                        </div>
+                        <div class="model-filter-results-list" id="model-filter-results"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-actions">
+                <button class="ghost-button primary" id="apply-model-filter" type="button">下发过滤</button>
+                <button class="ghost-button" id="use-selected-models" type="button">使用当前勾选</button>
+                <button class="ghost-button" id="clear-model-filter" type="button">清空过滤</button>
+                <button class="ghost-button subtle" id="cancel-model-filter" type="button">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-banner">
+        <div class="container">
+            <div class="status-banner-inner">
+                <span class="status-pill loading" id="data-status-pill">拉取中</span>
+                <span id="data-status-text">正在从 LiteLLM 读取完整模型配置...</span>
             </div>
         </div>
     </div>
 
     <main>
         <div class="container">
-            <div class="card-grid" id="card-grid">
-                <!-- Cards will be generated by JavaScript -->
+            <div class="loading-state" id="loading-state">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
+                <p id="loading-message">正在整理 LiteLLM 模型价格...</p>
             </div>
+            <div class="card-grid" id="card-grid"></div>
             <div class="no-results" id="no-results" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-                <p>没有找到匹配的模型</p>
+                <p>没有找到匹配的 provider 或模型</p>
             </div>
         </div>
     </main>
@@ -636,19 +1385,10 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-links">
-                    <a href="https://openai.com/api/pricing/" target="_blank">OpenAI</a>
-                    <a href="https://claude.com/pricing" target="_blank">Anthropic</a>
-                    <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank">Google</a>
-                    <a href="https://api-docs.deepseek.com/quick_start/pricing" target="_blank">Deepseek</a>
-                    <a href="https://help.aliyun.com/zh/model-studio/model-pricing" target="_blank">阿里云</a>
-                    <a href="https://www.volcengine.com/docs/82379/1544106" target="_blank">火山引擎</a>
-                    <a href="https://platform.moonshot.cn/docs/pricing/chat" target="_blank">月之暗面</a>
-                    <a href="https://platform.baichuan-ai.com/price" target="_blank">百川智能</a>
-                    <a href="https://bigmodel.cn/pricing" target="_blank">智谱</a>
-                    <a href="https://platform.lingyiwanwu.com/docs" target="_blank">零一万物</a>
-                    <a href="https://cloud.baidu.com/doc/WENXINWORKSHOP/s/clntwmv7t" target="_blank">百度</a>
+                    <a href="https://models.litellm.ai/" target="_blank" rel="noreferrer">LiteLLM Models</a>
+                    <a href="https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json" target="_blank" rel="noreferrer">LiteLLM Cost Map</a>
                 </div>
-                <a href="https://github.com/flanker/llmprice.cn" target="_blank" class="github-link">
+                <a href="https://github.com/flanker/llmprice.cn" target="_blank" rel="noreferrer" class="github-link">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                     GitHub
                 </a>
@@ -657,321 +1397,1304 @@
     </footer>
 
     <script>
-        // Price data from README.md
-        const providersData = [
-            {
-                name: 'OpenAI',
-                category: 'foreign',
-                categoryLabel: '国外',
-                logoClass: 'logo-openai',
-                logoText: 'O',
-                models: [
-                    { name: 'GPT-5.4', inputPrice: 17.5, outputPrice: 105, inputUsd: 2.50, outputUsd: 15, context: '1M', maxInput: '-', maxOutput: '128k' },
-                    { name: 'GPT-5.4 mini', inputPrice: 5.25, outputPrice: 31.5, inputUsd: 0.75, outputUsd: 4.50, context: '270k', maxInput: '-', maxOutput: '128k' },
-                    { name: 'GPT-5.4 nano', inputPrice: 1.4, outputPrice: 8.75, inputUsd: 0.20, outputUsd: 1.25, context: '270k', maxInput: '-', maxOutput: '128k' }
-                ]
-            },
-            {
-                name: 'Anthropic',
-                category: 'foreign',
-                categoryLabel: '国外',
-                logoClass: 'logo-anthropic',
-                logoText: 'A',
-                models: [
-                    { name: 'Claude Opus 4.6', inputPrice: 35, outputPrice: 175, inputUsd: 5, outputUsd: 25, context: '1M', maxInput: '-', maxOutput: '128k' },
-                    { name: 'Claude Sonnet 4.6', inputPrice: 21, outputPrice: 105, inputUsd: 3, outputUsd: 15, context: '1M', maxInput: '-', maxOutput: '64k' },
-                    { name: 'Claude Haiku 4.5', inputPrice: 7, outputPrice: 35, inputUsd: 1, outputUsd: 5, context: '200k', maxInput: '-', maxOutput: '64k' }
-                ]
-            },
-            {
-                name: 'Google',
-                category: 'foreign',
-                categoryLabel: '国外',
-                logoClass: 'logo-google',
-                logoText: 'G',
-                models: [
-                    { name: 'Gemini 3.1 Pro', inputPrice: 14, outputPrice: 84, inputUsd: 2, outputUsd: 12, context: '1M', maxInput: '-', maxOutput: '64k' },
-                    { name: 'Gemini 3 Flash', inputPrice: 3.5, outputPrice: 21, inputUsd: 0.50, outputUsd: 3, context: '1M', maxInput: '-', maxOutput: '64k' },
-                    { name: 'Gemini 2.5 Pro', inputPrice: 8.75, outputPrice: 70, inputUsd: 1.25, outputUsd: 10, context: '1M', maxInput: '-', maxOutput: '64k' },
-                    { name: 'Gemini 2.5 Flash', inputPrice: 2.1, outputPrice: 17.5, inputUsd: 0.30, outputUsd: 2.50, context: '1M', maxInput: '-', maxOutput: '64k' },
-                    { name: 'Gemini 2.5 Flash-Lite', inputPrice: 0.7, outputPrice: 2.8, inputUsd: 0.10, outputUsd: 0.40, context: '1M', maxInput: '-', maxOutput: '-' }
-                ]
-            },
-            {
-                name: 'Deepseek',
-                category: 'startup',
-                categoryLabel: '初创公司',
-                logoClass: 'logo-deepseek',
-                logoText: 'D',
-                models: [
-                    { name: 'deepseek-chat', inputPrice: 1.96, outputPrice: 2.94, inputUsd: 0.28, outputUsd: 0.42, context: '128k', maxInput: '-', maxOutput: '8k' },
-                    { name: 'deepseek-reasoner', inputPrice: 1.96, outputPrice: 2.94, inputUsd: 0.28, outputUsd: 0.42, context: '128k', maxInput: '-', maxOutput: '64k' }
-                ]
-            },
-            {
-                name: '阿里通义千问',
-                category: 'domestic-major',
-                categoryLabel: '国内大厂',
-                logoClass: 'logo-alibaba',
-                logoText: '阿',
-                models: [
-                    { name: 'qwen3.5-plus', inputPrice: 0.8, outputPrice: 4.8, context: '1M', maxInput: '1M', maxOutput: '-' },
-                    { name: 'qwen3-max', inputPrice: 2.5, outputPrice: 10, context: '252k', maxInput: '250k', maxOutput: '16k' },
-                    { name: 'qwen-plus', inputPrice: 0.8, outputPrice: 2, context: '1M', maxInput: '1M', maxOutput: '8k' }
-                ]
-            },
-            {
-                name: '字节豆包',
-                category: 'domestic-major',
-                categoryLabel: '国内大厂',
-                logoClass: 'logo-bytedance',
-                logoText: '豆',
-                models: [
-                    { name: 'Doubao-Seed-2.0-Pro', inputPrice: 3.2, outputPrice: 16, context: '256k', maxInput: '-', maxOutput: '-' },
-                    { name: 'Doubao-Seed-2.0-Lite', inputPrice: 0.6, outputPrice: 3.6, context: '256k', maxInput: '-', maxOutput: '-' }
-                ]
-            },
-            {
-                name: '月之暗面',
-                category: 'startup',
-                categoryLabel: '初创公司',
-                logoClass: 'logo-moonshot',
-                logoText: '月',
-                models: [
-                    { name: 'kimi-k2.5', inputPrice: 4, outputPrice: 21, context: '256k', maxInput: '-', maxOutput: '-' },
-                    { name: 'Kimi K2', inputPrice: 4, outputPrice: 16, context: '256k', maxInput: '-', maxOutput: '-' }
-                ]
-            },
-            {
-                name: '百川智能',
-                category: 'startup',
-                categoryLabel: '初创公司',
-                logoClass: 'logo-baichuan',
-                logoText: '百',
-                models: [
-                    { name: 'Baichuan-M3-Plus', inputPrice: 5, outputPrice: 9, context: '32k', maxInput: '-', maxOutput: '-' },
-                    { name: 'Baichuan4-Air', inputPrice: 0.98, outputPrice: 0.98, context: '32k', maxInput: '-', maxOutput: '-' }
-                ]
-            },
-            {
-                name: '智谱',
-                category: 'startup',
-                categoryLabel: '初创公司',
-                logoClass: 'logo-zhipu',
-                logoText: '智',
-                models: [
-                    { name: 'GLM-5', inputPrice: 4, outputPrice: 18, context: '200k', maxInput: '-', maxOutput: '-' },
-                    { name: 'GLM-4-Flash', inputPrice: 0, outputPrice: 0, isFree: true, context: '128k', maxInput: '-', maxOutput: '8k' }
-                ]
-            },
-            {
-                name: '零一万物',
-                category: 'startup',
-                categoryLabel: '初创公司',
-                logoClass: 'logo-yi',
-                logoText: '零',
-                models: [
-                    { name: 'yi-lightning', inputPrice: 1, outputPrice: 1, context: '16k', maxInput: '-', maxOutput: '-' }
-                ]
-            },
-            {
-                name: '百度文心',
-                category: 'domestic-major',
-                categoryLabel: '国内大厂',
-                logoClass: 'logo-baidu',
-                logoText: '度',
-                models: [
-                    { name: 'ERNIE-5.0', inputPrice: 6, outputPrice: 24, context: '32k', maxInput: '-', maxOutput: '-' },
-                    { name: 'ERNIE-4.5-Turbo', inputPrice: 0.8, outputPrice: 3.2, context: '128k', maxInput: '-', maxOutput: '-' },
-                    { name: 'ERNIE-Speed', inputPrice: 0, outputPrice: 0, isFree: true, context: '8k', maxInput: '-', maxOutput: '-' }
-                ]
-            }
+        const DEFAULT_USD_TO_CNY = 7;
+        const TOKENS_PER_MILLION = 1000000;
+        const LIVE_FETCH_TIMEOUT_MS = 8000;
+        const PRICING_CACHE_KEY = 'llmprice-litellm-cache-v2';
+        const LIVE_PRICING_SOURCES = [
+            'https://cdn.jsdelivr.net/gh/BerriAI/litellm@main/model_prices_and_context_window.json',
+            'https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json',
+            'https://raw.githubusercontent.com/BerriAI/litellm/main/litellm/model_prices_and_context_window_backup.json'
         ];
+        const TEXT_MODES = new Set(['chat', 'completion', 'responses']);
 
-        // Calculate max prices for bar visualization
-        let maxInputPrice = 0;
-        let maxOutputPrice = 0;
-        providersData.forEach(provider => {
-            provider.models.forEach(model => {
-                if (!model.isFree) {
-                    maxInputPrice = Math.max(maxInputPrice, model.inputPrice);
-                    maxOutputPrice = Math.max(maxOutputPrice, model.outputPrice);
-                }
-            });
+        const OFFICIAL_PROVIDERS = new Set([
+            'openai', 'anthropic', 'gemini', 'deepseek', 'dashscope', 'moonshot', 'zai',
+            'volcengine', 'xai', 'mistral', 'cohere', 'perplexity', 'groq', 'voyage', 'cerebras',
+            'minimax'
+        ]);
+
+        const CLOUD_PROVIDER_KEYWORDS = ['azure', 'bedrock', 'vertex', 'watsonx', 'databricks', 'cloudflare'];
+
+        const PROVIDER_LABELS = {
+            ai21: 'AI21 Labs',
+            aleph_alpha: 'Aleph Alpha',
+            amazon_nova: 'Amazon Nova',
+            anthropic: 'Anthropic',
+            bedrock: 'Amazon Bedrock',
+            bedrock_converse: 'Amazon Bedrock Converse',
+            azure: 'Microsoft Azure OpenAI',
+            azure_ai: 'Microsoft Foundry',
+            cerebras: 'Cerebras',
+            cloudflare: 'Cloudflare Workers AI',
+            cloudflare_ai: 'Cloudflare Workers AI',
+            cohere: 'Cohere',
+            cohere_chat: 'Cohere Chat',
+            dashscope: 'Alibaba Cloud Model Studio (DashScope)',
+            databricks: 'Databricks',
+            deepseek: 'DeepSeek',
+            deepinfra: 'DeepInfra',
+            fireworks_ai: 'Fireworks AI',
+            gemini: 'Google Gemini',
+            github_copilot: 'GitHub Copilot',
+            groq: 'Groq',
+            minimax: 'MiniMax',
+            mistral: 'Mistral AI',
+            moonshot: 'Moonshot AI (Kimi)',
+            openai: 'OpenAI',
+            openrouter: 'OpenRouter',
+            perplexity: 'Perplexity',
+            palm: 'Google PaLM',
+            replicate: 'Replicate',
+            sagemaker: 'Amazon SageMaker',
+            together_ai: 'Together AI',
+            'text-completion-openai': 'Text Completion OpenAI',
+            voyage: 'Voyage AI',
+            volcengine: 'Volcengine 火山引擎',
+            vercel_ai_gateway: 'Vercel AI Gateway',
+            vertex_ai: 'Google Cloud Vertex AI',
+            'vertex_ai-ai21_models': 'Google Cloud Vertex AI · AI21 Labs',
+            'vertex_ai-anthropic_models': 'Google Cloud Vertex AI · Anthropic',
+            'vertex_ai-deepseek_models': 'Google Cloud Vertex AI · DeepSeek',
+            'vertex_ai-language-models': 'Google Cloud Vertex AI · Gemini',
+            'vertex_ai-llama_models': 'Google Cloud Vertex AI · Llama',
+            'vertex_ai-minimax_models': 'Google Cloud Vertex AI · MiniMax',
+            'vertex_ai-mistral_models': 'Google Cloud Vertex AI · Mistral AI',
+            'vertex_ai-moonshot_models': 'Google Cloud Vertex AI · Moonshot AI',
+            'vertex_ai-openai_models': 'Google Cloud Vertex AI · OpenAI',
+            'vertex_ai-qwen_models': 'Google Cloud Vertex AI · Qwen',
+            'vertex_ai-text-models': 'Google Cloud Vertex AI · Text Models',
+            'vertex_ai-zai_models': 'Google Cloud Vertex AI · Z.AI',
+            xai: 'xAI',
+            zai: 'Z.AI'
+        };
+
+        const priceFormatter = new Intl.NumberFormat('zh-CN', {
+            maximumFractionDigits: 2
         });
 
-        // Render functions
-        function renderCard(provider) {
-            const modelRows = provider.models.map(model => {
-                const inputBarWidth = model.isFree ? 0 : (model.inputPrice / maxInputPrice * 100);
-                const outputBarWidth = model.isFree ? 0 : (model.outputPrice / maxOutputPrice * 100);
+        const timeFormatter = new Intl.DateTimeFormat('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
 
-                let inputPriceHtml, outputPriceHtml;
+        const exchangeRateFormatter = new Intl.NumberFormat('zh-CN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 4
+        });
+
+        let providersData = [];
+        let maxInputPrice = 0;
+        let maxOutputPrice = 0;
+        let activeProviderFilter = new Set();
+        let activeModelIdFilter = new Set();
+        let selectedModelKeys = new Set();
+        let draftProviderFilter = new Set();
+        let draftModelIdFilter = new Set();
+        let flatModelOptions = [];
+        let modelLookupByNormalizedKey = new Map();
+        let providerLookupById = new Map();
+        let usdToCnyRate = DEFAULT_USD_TO_CNY;
+        let collapsedProviderCards = new Set();
+        let hasInitializedCollapsedProviderCards = false;
+        let knownProviderCardIds = new Set();
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatNumber(value) {
+            return priceFormatter.format(value);
+        }
+
+        function formatTokenCount(tokenCount) {
+            if (!Number.isFinite(tokenCount) || tokenCount <= 0) {
+                return '-';
+            }
+
+            if (tokenCount >= 1000000) {
+                return `${formatNumber(tokenCount / 1000000)}M`;
+            }
+
+            if (tokenCount >= 1000) {
+                return `${formatNumber(tokenCount / 1000)}k`;
+            }
+
+            return `${tokenCount}`;
+        }
+
+        function formatTimeStamp(value) {
+            if (!value) {
+                return '未知';
+            }
+
+            const date = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return timeFormatter.format(new Date());
+            }
+
+            return timeFormatter.format(date);
+        }
+
+        function formatExchangeRate(value) {
+            return exchangeRateFormatter.format(value);
+        }
+
+        function hashString(text) {
+            let hash = 0;
+            for (let index = 0; index < text.length; index += 1) {
+                hash = ((hash << 5) - hash) + text.charCodeAt(index);
+                hash |= 0;
+            }
+            return Math.abs(hash);
+        }
+
+        function buildProviderLogoStyle(providerId) {
+            const hue = hashString(providerId) % 360;
+            const secondHue = (hue + 38) % 360;
+            return `background: linear-gradient(135deg, hsl(${hue}, 72%, 54%), hsl(${secondHue}, 68%, 42%));`;
+        }
+
+        function buildProviderLogoText(providerId) {
+            const compact = providerId.replace(/[^a-zA-Z0-9]/g, '');
+            const source = compact || providerId;
+            return source.slice(0, 2).toUpperCase();
+        }
+
+        function humanizeProviderId(providerId) {
+            if (PROVIDER_LABELS[providerId]) {
+                return PROVIDER_LABELS[providerId];
+            }
+
+            return providerId
+                .split(/[_-]+/)
+                .map(part => part ? part.charAt(0).toUpperCase() + part.slice(1) : '')
+                .join(' ');
+        }
+
+        function parseKeywordLines(rawValue) {
+            if (!rawValue) {
+                return [];
+            }
+
+            return Array.from(new Set(
+                rawValue
+                    .split(/\r?\n/)
+                    .map(item => item.trim().toLowerCase())
+                    .filter(Boolean)
+            ));
+        }
+
+        function rebuildProviderLookup() {
+            providerLookupById = new Map(
+                providersData.map(provider => [provider.id, provider])
+            );
+        }
+
+        function getMatchingProvidersByQuery(query) {
+            const providers = Array.from(providerLookupById.values());
+            const normalizedQuery = query.trim().toLowerCase();
+
+            return providers
+                .filter(provider => {
+                    if (!normalizedQuery) {
+                        return true;
+                    }
+
+                    const providerSearchText = `${provider.id} ${provider.name} ${provider.categoryLabel}`.toLowerCase();
+                    return providerSearchText.includes(normalizedQuery);
+                })
+                .sort((left, right) => left.name.localeCompare(right.name));
+        }
+
+        function renderProviderFilterResults() {
+            const input = document.getElementById('provider-filter-search');
+            const selectionSummary = document.getElementById('provider-filter-selection-summary');
+            const matchBadge = document.getElementById('provider-filter-match-badge');
+            const resultsSummary = document.getElementById('provider-filter-results-summary');
+            const results = document.getElementById('provider-filter-results');
+            const providerOptions = getMatchingProvidersByQuery(input.value);
+            const hasQuery = input.value.trim().length > 0;
+
+            selectionSummary.textContent = `待下发 ${draftProviderFilter.size} 个厂家`;
+            matchBadge.textContent = hasQuery ? `匹配 ${providerOptions.length} 个厂家` : `全部 ${providerOptions.length} 个厂家`;
+            resultsSummary.textContent = providerOptions.length > 0
+                ? '下拉勾选后点击“下发厂家过滤”，顶部会以标签形式展示当前生效的厂家列表。'
+                : '没有匹配到厂家，请尝试更短的搜索词。';
+
+            if (providerOptions.length === 0) {
+                results.innerHTML = '<div class="model-filter-empty">没有找到匹配的厂家。可以尝试输入更短的搜索词，比如 <span class="mono">open</span> 或 <span class="mono">vertex</span>。</div>';
+                return;
+            }
+
+            results.innerHTML = providerOptions.map(provider => `
+                <label class="model-filter-option">
+                    <input
+                        type="checkbox"
+                        data-provider-filter-option="true"
+                        value="${escapeHtml(provider.id)}"
+                        ${draftProviderFilter.has(provider.id) ? 'checked' : ''}
+                    >
+                    <div class="model-filter-option-main">
+                        <span>${escapeHtml(provider.name)}</span>
+                        <span class="model-filter-option-provider">${escapeHtml(provider.id)} · ${escapeHtml(provider.categoryLabel)} · ${provider.models.length} 个模型</span>
+                    </div>
+                </label>
+            `).join('');
+        }
+
+        function renderActiveProviderFilterTags() {
+            const wrapper = document.getElementById('active-provider-filter-summary');
+            const container = document.getElementById('active-provider-filter-tags');
+            const clearButton = document.getElementById('clear-active-provider-filter');
+            const activeProviders = Array.from(activeProviderFilter)
+                .map(providerId => providerLookupById.get(providerId))
+                .filter(Boolean)
+                .sort((left, right) => left.name.localeCompare(right.name));
+
+            wrapper.classList.toggle('active', activeProviders.length > 0);
+            clearButton.style.display = activeProviders.length > 0 ? 'inline-flex' : 'none';
+
+            if (activeProviders.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = activeProviders.map(provider => `
+                <button class="toolbar-filter-chip" type="button" data-remove-provider-filter="${escapeHtml(provider.id)}" aria-label="移除 ${escapeHtml(provider.name)} 厂家过滤">
+                    <span>${escapeHtml(provider.name)}</span>
+                    <span class="toolbar-filter-chip-close" aria-hidden="true">×</span>
+                </button>
+            `).join('');
+        }
+
+        function syncProviderFilterSummary() {
+            renderProviderFilterResults();
+            renderActiveProviderFilterTags();
+        }
+
+        function setProviderFilterPanelOpen(isOpen) {
+            const toggle = document.getElementById('provider-filter-toggle');
+            const panel = document.getElementById('provider-filter-panel');
+            const wrap = document.getElementById('provider-filter-wrap');
+
+            if (!isOpen && panel.contains(document.activeElement)) {
+                toggle.focus();
+            }
+
+            toggle.classList.toggle('active', isOpen);
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            panel.classList.toggle('open', isOpen);
+            panel.setAttribute('aria-hidden', String(!isOpen));
+            wrap.classList.toggle('open', isOpen);
+
+            if (isOpen) {
+                window.requestAnimationFrame(() => {
+                    document.getElementById('provider-filter-search').focus();
+                });
+            }
+        }
+
+        function openProviderFilterPanel() {
+            draftProviderFilter = new Set(activeProviderFilter);
+            syncProviderFilterSummary();
+            const panel = document.getElementById('provider-filter-panel');
+            setProviderFilterPanelOpen(!panel.classList.contains('open'));
+        }
+
+        function applyProviderFilter() {
+            activeProviderFilter = new Set(draftProviderFilter);
+            syncProviderFilterSummary();
+            filterCards();
+            setProviderFilterPanelOpen(false);
+        }
+
+        function clearProviderFilter() {
+            document.getElementById('provider-filter-search').value = '';
+            activeProviderFilter = new Set();
+            draftProviderFilter = new Set();
+            syncProviderFilterSummary();
+            filterCards();
+        }
+
+        function rebuildModelLookup() {
+            flatModelOptions = [];
+            modelLookupByNormalizedKey = new Map();
+
+            providersData.forEach(provider => {
+                provider.models.forEach(model => {
+                    const option = {
+                        ...model,
+                        providerId: provider.id,
+                        providerName: provider.name
+                    };
+
+                    flatModelOptions.push(option);
+                    modelLookupByNormalizedKey.set(model.normalizedKey, option);
+                });
+            });
+        }
+
+        function getMatchingModelsByKeywords(keywords) {
+            if (keywords.length === 0) {
+                return [];
+            }
+
+            return flatModelOptions.filter(model => keywords.some(keyword => model.normalizedKey.includes(keyword)));
+        }
+
+        function renderModelFilterResults() {
+            const input = document.getElementById('model-filter-input');
+            const badge = document.getElementById('model-filter-badge');
+            const matchBadge = document.getElementById('model-filter-match-badge');
+            const selectionSummary = document.getElementById('model-selection-summary');
+            const resultsSummary = document.getElementById('model-filter-results-summary');
+            const results = document.getElementById('model-filter-results');
+            const keywords = parseKeywordLines(input.value);
+            const matchedModels = getMatchingModelsByKeywords(keywords)
+                .sort((left, right) => left.key.localeCompare(right.key));
+
+            badge.textContent = `已输入 ${keywords.length} 行关键词`;
+            selectionSummary.textContent = `待下发 ${draftModelIdFilter.size} 个模型`;
+
+            if (keywords.length === 0) {
+                const stagedModels = Array.from(draftModelIdFilter)
+                    .map(key => modelLookupByNormalizedKey.get(key))
+                    .filter(Boolean)
+                    .sort((left, right) => left.key.localeCompare(right.key));
+
+                matchBadge.textContent = stagedModels.length > 0
+                    ? `暂存 ${stagedModels.length} 个模型`
+                    : '等待输入关键词';
+                resultsSummary.textContent = stagedModels.length > 0
+                    ? '当前展示的是待下发模型，你也可以继续输入新关键词补充匹配。'
+                    : '每行关键词会匹配包含该片段的模型 ID。';
+
+                if (stagedModels.length === 0) {
+                    results.innerHTML = '<div class="model-filter-empty">先输入关键词，再从匹配结果里勾选模型。比如输入 <span class="mono">gpt-4.1</span>、<span class="mono">claude-3-7</span>。</div>';
+                    return;
+                }
+
+                results.innerHTML = stagedModels.map(model => `
+                    <label class="model-filter-option">
+                        <input type="checkbox" data-model-filter-option="true" value="${escapeHtml(model.normalizedKey)}" checked>
+                        <div class="model-filter-option-main">
+                            <span class="model-key mono">${escapeHtml(model.key)}</span>
+                            <span class="model-filter-option-provider">${escapeHtml(model.providerName)}</span>
+                        </div>
+                    </label>
+                `).join('');
+                return;
+            }
+
+            matchBadge.textContent = `匹配 ${matchedModels.length} 个模型`;
+            resultsSummary.textContent = matchedModels.length > 0
+                ? '勾选后点击“下发过滤”，顶部会以标签形式展示当前生效的模型列表。'
+                : '没有匹配到模型，请尝试缩短关键词或换一行新的片段。';
+
+            if (matchedModels.length === 0) {
+                results.innerHTML = '<div class="model-filter-empty">没有找到匹配的模型 ID。可以尝试输入更短的关键词，比如 <span class="mono">gpt</span> 或 <span class="mono">deepseek</span>。</div>';
+                return;
+            }
+
+            results.innerHTML = matchedModels.map(model => `
+                <label class="model-filter-option">
+                    <input
+                        type="checkbox"
+                        data-model-filter-option="true"
+                        value="${escapeHtml(model.normalizedKey)}"
+                        ${draftModelIdFilter.has(model.normalizedKey) ? 'checked' : ''}
+                    >
+                    <div class="model-filter-option-main">
+                        <span class="model-key mono">${escapeHtml(model.key)}</span>
+                        <span class="model-filter-option-provider">${escapeHtml(model.providerName)}</span>
+                    </div>
+                </label>
+            `).join('');
+        }
+
+        function renderActiveModelFilterTags() {
+            const wrapper = document.getElementById('active-model-filter-summary');
+            const container = document.getElementById('active-model-filter-tags');
+            const clearButton = document.getElementById('clear-active-model-filter');
+            const activeModels = Array.from(activeModelIdFilter)
+                .map(key => modelLookupByNormalizedKey.get(key))
+                .filter(Boolean)
+                .sort((left, right) => left.key.localeCompare(right.key));
+
+            wrapper.classList.toggle('active', activeModels.length > 0);
+            clearButton.style.display = activeModels.length > 0 ? 'inline-flex' : 'none';
+
+            if (activeModels.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            container.innerHTML = activeModels.map(model => `
+                <button class="toolbar-filter-chip" type="button" data-remove-model-filter="${escapeHtml(model.normalizedKey)}" aria-label="移除 ${escapeHtml(model.key)} 过滤">
+                    <span class="mono">${escapeHtml(model.key)}</span>
+                    <span class="toolbar-filter-chip-close" aria-hidden="true">×</span>
+                </button>
+            `).join('');
+        }
+
+        function syncModelFilterSummary() {
+            renderModelFilterResults();
+            renderActiveModelFilterTags();
+        }
+
+        function setModelFilterPanelOpen(isOpen) {
+            const toggle = document.getElementById('model-filter-toggle');
+            const panel = document.getElementById('model-filter-panel');
+
+            if (!isOpen && panel.contains(document.activeElement)) {
+                toggle.focus();
+            }
+
+            toggle.classList.toggle('active', isOpen);
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            panel.classList.toggle('open', isOpen);
+            panel.setAttribute('aria-hidden', String(!isOpen));
+            document.body.classList.toggle('dialog-open', isOpen);
+
+            if (isOpen) {
+                window.requestAnimationFrame(() => {
+                    document.getElementById('model-filter-input').focus();
+                });
+            }
+        }
+
+        function openModelFilterPanel() {
+            draftModelIdFilter = new Set(activeModelIdFilter);
+            syncModelFilterSummary();
+            setModelFilterPanelOpen(true);
+        }
+
+        function applyModelIdFilter() {
+            activeModelIdFilter = new Set(draftModelIdFilter);
+            syncModelFilterSummary();
+            filterCards();
+            setModelFilterPanelOpen(false);
+        }
+
+        function clearModelIdFilter() {
+            document.getElementById('model-filter-input').value = '';
+            activeModelIdFilter = new Set();
+            draftModelIdFilter = new Set();
+            syncModelFilterSummary();
+            filterCards();
+        }
+
+        function populateModelFilterFromSelection() {
+            draftModelIdFilter = new Set(selectedModelKeys);
+            document.getElementById('model-filter-input').value = '';
+            syncModelFilterSummary();
+        }
+
+        function getProviderCategory(providerId) {
+            if (OFFICIAL_PROVIDERS.has(providerId)) {
+                return {
+                    id: 'official',
+                    label: '官方/直连'
+                };
+            }
+
+            if (CLOUD_PROVIDER_KEYWORDS.some(keyword => providerId.includes(keyword))) {
+                return {
+                    id: 'cloud',
+                    label: '云平台'
+                };
+            }
+
+            return {
+                id: 'platform',
+                label: '聚合/托管'
+            };
+        }
+
+        function extractPricing(entry) {
+            if (!entry) {
+                return null;
+            }
+
+            if (typeof entry.input_cost_per_token === 'number' && typeof entry.output_cost_per_token === 'number') {
+                return {
+                    inputCostPerToken: entry.input_cost_per_token,
+                    outputCostPerToken: entry.output_cost_per_token,
+                    isTiered: false
+                };
+            }
+
+            if (Array.isArray(entry.tiered_pricing) && entry.tiered_pricing.length > 0) {
+                const firstTier = entry.tiered_pricing[0];
+                if (typeof firstTier.input_cost_per_token === 'number' && typeof firstTier.output_cost_per_token === 'number') {
+                    return {
+                        inputCostPerToken: firstTier.input_cost_per_token,
+                        outputCostPerToken: firstTier.output_cost_per_token,
+                        isTiered: true
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        function isRenderableChatModel(modelKey, entry) {
+            if (modelKey === 'sample_spec') {
+                return false;
+            }
+
+            if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+                return false;
+            }
+
+            const mode = entry.mode;
+            if (!TEXT_MODES.has(mode)) {
+                return false;
+            }
+
+            return Boolean(extractPricing(entry));
+        }
+
+        function buildDisplayName(modelKey, providerId) {
+            const prefix = `${providerId}/`;
+            if (modelKey.startsWith(prefix)) {
+                return modelKey.slice(prefix.length);
+            }
+            return modelKey;
+        }
+
+        function normalizeModel(modelKey, entry) {
+            const pricing = extractPricing(entry);
+            const inputUsd = pricing.inputCostPerToken * TOKENS_PER_MILLION;
+            const outputUsd = pricing.outputCostPerToken * TOKENS_PER_MILLION;
+            const providerId = entry.litellm_provider || 'unknown';
+
+            return {
+                name: buildDisplayName(modelKey, providerId),
+                key: modelKey,
+                inputPrice: inputUsd * usdToCnyRate,
+                outputPrice: outputUsd * usdToCnyRate,
+                inputUsd,
+                outputUsd,
+                context: formatTokenCount(entry.max_input_tokens || entry.max_tokens || null),
+                isFree: inputUsd === 0 && outputUsd === 0,
+                isTiered: pricing.isTiered,
+                normalizedKey: modelKey.toLowerCase(),
+                searchText: `${providerId} ${modelKey} ${buildDisplayName(modelKey, providerId)}`.toLowerCase()
+            };
+        }
+
+        function buildProvidersData(pricingMap) {
+            const groupedProviders = new Map();
+
+            Object.entries(pricingMap).forEach(([modelKey, entry]) => {
+                if (!isRenderableChatModel(modelKey, entry)) {
+                    return;
+                }
+
+                const providerId = entry.litellm_provider || 'unknown';
+                const category = getProviderCategory(providerId);
+                const normalizedModel = normalizeModel(modelKey, entry);
+
+                if (!groupedProviders.has(providerId)) {
+                    groupedProviders.set(providerId, {
+                        id: providerId,
+                        name: humanizeProviderId(providerId),
+                        category: category.id,
+                        categoryLabel: category.label,
+                        logoText: buildProviderLogoText(providerId),
+                        logoStyle: buildProviderLogoStyle(providerId),
+                        searchText: `${providerId} ${humanizeProviderId(providerId)}`.toLowerCase(),
+                        models: []
+                    });
+                }
+
+                groupedProviders.get(providerId).models.push(normalizedModel);
+            });
+
+            const categoryOrder = {
+                official: 0,
+                cloud: 1,
+                platform: 2
+            };
+
+            return Array.from(groupedProviders.values())
+                .map(provider => ({
+                    ...provider,
+                    models: provider.models.sort((left, right) => {
+                        if (left.isFree !== right.isFree) {
+                            return left.isFree ? 1 : -1;
+                        }
+                        if (left.inputPrice !== right.inputPrice) {
+                            return left.inputPrice - right.inputPrice;
+                        }
+                        if (left.outputPrice !== right.outputPrice) {
+                            return left.outputPrice - right.outputPrice;
+                        }
+                        return left.key.localeCompare(right.key);
+                    })
+                }))
+                .sort((left, right) => {
+                    if (categoryOrder[left.category] !== categoryOrder[right.category]) {
+                        return categoryOrder[left.category] - categoryOrder[right.category];
+                    }
+                    if (left.models.length !== right.models.length) {
+                        return right.models.length - left.models.length;
+                    }
+                    return left.name.localeCompare(right.name);
+                });
+        }
+
+        function summarizeProviders() {
+            return {
+                providers: providersData.length,
+                models: providersData.reduce((count, provider) => count + provider.models.length, 0)
+            };
+        }
+
+        function updateStatus(mode, message, updatedAtText) {
+            const pill = document.getElementById('data-status-pill');
+            pill.className = `status-pill ${mode}`;
+            pill.textContent = mode === 'live' ? '实时' : mode === 'snapshot' ? '缓存' : '拉取中';
+            document.getElementById('data-status-text').textContent = message;
+            document.getElementById('updated-at').textContent = updatedAtText;
+        }
+
+        function showLoadingMessage(message) {
+            document.getElementById('loading-state').style.display = 'block';
+            document.getElementById('loading-message').textContent = message;
+        }
+
+        function hideLoadingMessage() {
+            document.getElementById('loading-state').style.display = 'none';
+        }
+
+        function recalculatePriceExtremes() {
+            maxInputPrice = 0;
+            maxOutputPrice = 0;
+
+            providersData.forEach(provider => {
+                provider.models.forEach(model => {
+                    if (!model.isFree) {
+                        maxInputPrice = Math.max(maxInputPrice, model.inputPrice);
+                        maxOutputPrice = Math.max(maxOutputPrice, model.outputPrice);
+                    }
+                });
+            });
+        }
+
+        function syncExchangeRateInput() {
+            const input = document.getElementById('exchange-rate-input');
+            if (input) {
+                input.value = String(formatExchangeRate(usdToCnyRate));
+            }
+        }
+
+        function applyExchangeRate(rate) {
+            usdToCnyRate = rate;
+
+            providersData.forEach(provider => {
+                provider.models.forEach(model => {
+                    model.inputPrice = model.inputUsd * usdToCnyRate;
+                    model.outputPrice = model.outputUsd * usdToCnyRate;
+                });
+            });
+
+            syncExchangeRateInput();
+
+            if (providersData.length > 0) {
+                rerenderCurrentView();
+            }
+        }
+
+        function handleExchangeRateCommit() {
+            const input = document.getElementById('exchange-rate-input');
+            const nextRate = Number(input.value);
+
+            if (!Number.isFinite(nextRate) || nextRate <= 0) {
+                syncExchangeRateInput();
+                return;
+            }
+
+            applyExchangeRate(nextRate);
+        }
+
+        function syncCollapsedProviderCardsForCurrentData() {
+            const currentProviderIds = new Set(providersData.map(provider => provider.id));
+
+            if (!hasInitializedCollapsedProviderCards) {
+                collapsedProviderCards = new Set(currentProviderIds);
+                knownProviderCardIds = new Set(currentProviderIds);
+                hasInitializedCollapsedProviderCards = true;
+                return;
+            }
+
+            collapsedProviderCards = new Set(
+                Array.from(collapsedProviderCards).filter(providerId => currentProviderIds.has(providerId))
+            );
+
+            currentProviderIds.forEach(providerId => {
+                if (!knownProviderCardIds.has(providerId)) {
+                    collapsedProviderCards.add(providerId);
+                }
+            });
+
+            knownProviderCardIds = currentProviderIds;
+        }
+
+        function syncProviderCollapseActions() {
+            const expandButton = document.getElementById('expand-all-provider-cards');
+            const collapseButton = document.getElementById('collapse-all-provider-cards');
+            if (!expandButton || !collapseButton) {
+                return;
+            }
+
+            const totalProviders = providersData.length;
+            const collapsedCount = collapsedProviderCards.size;
+            expandButton.disabled = totalProviders === 0 || collapsedCount === 0;
+            collapseButton.disabled = totalProviders === 0 || collapsedCount === totalProviders;
+        }
+
+        function expandAllProviderCards() {
+            collapsedProviderCards.clear();
+            rerenderCurrentView();
+        }
+
+        function collapseAllProviderCards() {
+            collapsedProviderCards = new Set(providersData.map(provider => provider.id));
+            rerenderCurrentView();
+        }
+
+        function isProviderCardCollapsed(providerId) {
+            return collapsedProviderCards.has(providerId);
+        }
+
+        function renderCard(provider) {
+            const isCollapsed = isProviderCardCollapsed(provider.id);
+            const modelRows = provider.models.map(model => {
+                const inputBarWidth = model.isFree || maxInputPrice === 0 ? 0 : (model.inputPrice / maxInputPrice * 100);
+                const outputBarWidth = model.isFree || maxOutputPrice === 0 ? 0 : (model.outputPrice / maxOutputPrice * 100);
+                const suffix = model.isTiered ? ' 起' : '';
+
+                let inputPriceHtml;
+                let outputPriceHtml;
+
                 if (model.isFree) {
                     inputPriceHtml = '<span class="price-free">免费</span>';
                     outputPriceHtml = '<span class="price-free">免费</span>';
                 } else {
-                    const inputUsdText = model.inputUsd ? `<span class="price-usd">($${model.inputUsd})</span>` : '';
-                    const outputUsdText = model.outputUsd ? `<span class="price-usd">($${model.outputUsd})</span>` : '';
                     inputPriceHtml = `
-                        <span class="price-input">${model.inputPrice}元</span>${inputUsdText}
+                        <span class="price-input">${formatNumber(model.inputPrice)}元${suffix}</span>
+                        <span class="price-usd">($${formatNumber(model.inputUsd)})</span>
                         <div class="price-bar"><div class="price-bar-fill input" style="width: ${inputBarWidth}%"></div></div>
                     `;
                     outputPriceHtml = `
-                        <span class="price-output">${model.outputPrice}元</span>${outputUsdText}
+                        <span class="price-output">${formatNumber(model.outputPrice)}元${suffix}</span>
+                        <span class="price-usd">($${formatNumber(model.outputUsd)})</span>
                         <div class="price-bar"><div class="price-bar-fill output" style="width: ${outputBarWidth}%"></div></div>
                     `;
                 }
 
                 return `
-                    <tr data-model-name="${model.name.toLowerCase()}">
-                        <td><span class="model-name">${model.name}</span></td>
+                    <tr data-model-name="${escapeHtml(model.searchText)}" data-model-key-normalized="${escapeHtml(model.normalizedKey)}">
+                        <td class="model-select-cell">
+                            <input
+                                class="model-select"
+                                type="checkbox"
+                                value="${escapeHtml(model.normalizedKey)}"
+                                data-model-select="true"
+                                ${selectedModelKeys.has(model.normalizedKey) ? 'checked' : ''}
+                                aria-label="勾选 ${escapeHtml(model.key)}"
+                            >
+                        </td>
+                        <td>
+                            <span class="model-name">${escapeHtml(model.name)}</span>
+                            <span class="model-key mono">${escapeHtml(model.key)}</span>
+                        </td>
                         <td>${inputPriceHtml}</td>
                         <td>${outputPriceHtml}</td>
-                        <td><span class="context-length">${model.context}</span></td>
+                        <td><span class="context-length">${escapeHtml(model.context)}</span></td>
                     </tr>
                 `;
             }).join('');
 
             return `
-                <div class="provider-card" data-category="${provider.category}" data-provider="${provider.name.toLowerCase()}">
+                <div class="provider-card ${isCollapsed ? 'collapsed' : ''}" data-category="${escapeHtml(provider.category)}" data-provider="${escapeHtml(provider.id)}">
                     <div class="card-header">
-                        <div class="provider-logo ${provider.logoClass}">${provider.logoText}</div>
-                        <div class="provider-info">
-                            <div class="provider-name">${provider.name}</div>
-                            <div class="provider-category">${provider.categoryLabel}</div>
+                        <div class="card-header-main">
+                            <div class="provider-logo" style="${provider.logoStyle}">${escapeHtml(provider.logoText)}</div>
+                            <div class="provider-info">
+                                <div class="provider-name">${escapeHtml(provider.name)}</div>
+                                <div class="provider-category">${escapeHtml(provider.categoryLabel)}</div>
+                            </div>
                         </div>
-                        <span class="model-count">${provider.models.length} 个模型</span>
+                        <div class="card-header-actions">
+                            <span class="model-count" data-model-count="${provider.models.length}">${provider.models.length} 个模型</span>
+                            <button
+                                class="card-collapse-toggle"
+                                type="button"
+                                data-provider-card-toggle="${escapeHtml(provider.id)}"
+                                aria-expanded="${String(!isCollapsed)}"
+                                aria-label="${isCollapsed ? '展开' : '收起'} ${escapeHtml(provider.name)} 模型卡片"
+                            >
+                                <svg class="card-collapse-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                <span class="card-collapse-label">${isCollapsed ? '展开' : '收起'}</span>
+                            </button>
+                        </div>
                     </div>
-                    <table class="card-table">
-                        <thead>
-                            <tr>
-                                <th>模型</th>
-                                <th>输入价格</th>
-                                <th>输出价格</th>
-                                <th>上下文</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${modelRows}
-                        </tbody>
-                    </table>
+                    <div class="provider-card-body">
+                        <table class="card-table">
+                            <thead>
+                                <tr>
+                                    <th class="model-select-col">选中</th>
+                                    <th>模型</th>
+                                    <th>输入价格</th>
+                                    <th>输出价格</th>
+                                    <th>上下文</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${modelRows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
         }
 
         function renderAllCards() {
             const grid = document.getElementById('card-grid');
+            hideLoadingMessage();
             grid.innerHTML = providersData.map(renderCard).join('');
         }
 
-        // Filter functionality
+        function updateVisibleModelCount(card, visibleModelCount) {
+            const counter = card.querySelector('[data-model-count]');
+            const totalCount = Number(counter?.dataset.modelCount || 0);
+            if (!counter) {
+                return;
+            }
+
+            counter.textContent = activeModelIdFilter.size > 0
+                ? `${visibleModelCount} / ${totalCount} 个模型`
+                : `${totalCount} 个模型`;
+        }
+
         function filterCards() {
             const activeFilter = document.querySelector('.filter-tag.active').dataset.filter;
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
             const cards = document.querySelectorAll('.provider-card');
             let visibleCount = 0;
 
             cards.forEach(card => {
                 const category = card.dataset.category;
-                const providerName = card.dataset.provider;
-                const modelNames = Array.from(card.querySelectorAll('[data-model-name]')).map(el => el.dataset.modelName);
+                const provider = providersData.find(item => item.id === card.dataset.provider);
+                const providerSearchText = provider ? provider.searchText : '';
+                const providerId = card.dataset.provider || '';
+                const rows = Array.from(card.querySelectorAll('tbody tr'));
+                const visibleRows = rows.filter(row => {
+                    const matchModelId = activeModelIdFilter.size === 0 || activeModelIdFilter.has(row.dataset.modelKeyNormalized || '');
+                    row.classList.toggle('model-row-hidden', !matchModelId);
 
-                // Category filter
-                let categoryMatch = activeFilter === 'all' || category === activeFilter;
+                    if (!matchModelId) {
+                        row.style.background = '';
+                    }
 
-                // Search filter
+                    return matchModelId;
+                });
+                const modelNames = visibleRows.map(element => element.dataset.modelName);
+                const categoryMatch = activeFilter === 'all' || category === activeFilter;
+                const providerFilterMatch = activeProviderFilter.size === 0 || activeProviderFilter.has(providerId);
+                const hasVisibleRows = visibleRows.length > 0;
                 let searchMatch = true;
-                if (searchTerm) {
-                    const nameMatch = providerName.includes(searchTerm);
-                    const modelMatch = modelNames.some(name => name.includes(searchTerm));
-                    searchMatch = nameMatch || modelMatch;
 
-                    // Highlight matching rows
-                    card.querySelectorAll('tbody tr').forEach(row => {
+                if (searchTerm) {
+                    const providerMatch = providerSearchText.includes(searchTerm);
+                    const modelMatch = modelNames.some(name => name.includes(searchTerm));
+                    searchMatch = providerMatch || modelMatch;
+
+                    rows.forEach(row => {
                         const modelName = row.dataset.modelName;
-                        if (modelName && modelName.includes(searchTerm)) {
-                            row.style.background = 'var(--accent-blue-light)';
-                        } else {
-                            row.style.background = '';
-                        }
+                        const isVisible = !row.classList.contains('model-row-hidden');
+                        row.style.background = isVisible && modelName && modelName.includes(searchTerm)
+                            ? 'var(--accent-blue-light)'
+                            : '';
                     });
                 } else {
-                    card.querySelectorAll('tbody tr').forEach(row => {
+                    rows.forEach(row => {
                         row.style.background = '';
                     });
                 }
 
-                if (categoryMatch && searchMatch) {
+                updateVisibleModelCount(card, visibleRows.length);
+
+                if (categoryMatch && providerFilterMatch && searchMatch && hasVisibleRows) {
                     card.classList.remove('hidden');
-                    visibleCount++;
+                    visibleCount += 1;
                 } else {
                     card.classList.add('hidden');
                 }
             });
 
-            // Show/hide no results message
             document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
         }
 
-        // Sort functionality
+        function getComparablePrice(provider, type) {
+            const prices = provider.models
+                .filter(model => !model.isFree)
+                .map(model => type === 'input' ? model.inputPrice : model.outputPrice);
+
+            return prices.length > 0 ? Math.min(...prices) : Infinity;
+        }
+
         function sortCards() {
             const sortValue = document.getElementById('sort-select').value;
             const grid = document.getElementById('card-grid');
             const cards = Array.from(grid.querySelectorAll('.provider-card'));
 
             if (sortValue === 'default') {
-                // Reset to original order
                 renderAllCards();
                 filterCards();
                 return;
             }
 
-            cards.sort((a, b) => {
-                const aProvider = providersData.find(p => p.name.toLowerCase() === a.dataset.provider);
-                const bProvider = providersData.find(p => p.name.toLowerCase() === b.dataset.provider);
-
-                // Get min non-free price for comparison
-                const getMinPrice = (provider, type) => {
-                    const prices = provider.models
-                        .filter(m => !m.isFree)
-                        .map(m => type === 'input' ? m.inputPrice : m.outputPrice);
-                    return prices.length > 0 ? Math.min(...prices) : Infinity;
-                };
-
-                let aPrice, bPrice;
-                if (sortValue.startsWith('input')) {
-                    aPrice = getMinPrice(aProvider, 'input');
-                    bPrice = getMinPrice(bProvider, 'input');
-                } else {
-                    aPrice = getMinPrice(aProvider, 'output');
-                    bPrice = getMinPrice(bProvider, 'output');
-                }
-
-                if (sortValue.endsWith('asc')) {
-                    return aPrice - bPrice;
-                } else {
-                    return bPrice - aPrice;
-                }
+            cards.sort((left, right) => {
+                const leftProvider = providersData.find(provider => provider.id === left.dataset.provider);
+                const rightProvider = providersData.find(provider => provider.id === right.dataset.provider);
+                const type = sortValue.startsWith('input') ? 'input' : 'output';
+                const leftPrice = getComparablePrice(leftProvider, type);
+                const rightPrice = getComparablePrice(rightProvider, type);
+                return sortValue.endsWith('asc') ? leftPrice - rightPrice : rightPrice - leftPrice;
             });
 
             cards.forEach(card => grid.appendChild(card));
+            filterCards();
         }
 
-        // Event listeners
+        function savePricingCache(data, updatedAt) {
+            try {
+                localStorage.setItem(PRICING_CACHE_KEY, JSON.stringify({
+                    updatedAt,
+                    data
+                }));
+            } catch (error) {
+                console.warn('Failed to persist LiteLLM cache:', error);
+            }
+        }
+
+        function loadPricingCache() {
+            try {
+                const rawCache = localStorage.getItem(PRICING_CACHE_KEY);
+                if (!rawCache) {
+                    return null;
+                }
+                return JSON.parse(rawCache);
+            } catch (error) {
+                console.warn('Failed to read LiteLLM cache:', error);
+                return null;
+            }
+        }
+
+        async function fetchJsonWithTimeout(url) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), LIVE_FETCH_TIMEOUT_MS);
+
+            try {
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                return {
+                    data: await response.json(),
+                    response
+                };
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        async function loadLivePricing() {
+            let lastError = null;
+
+            for (const url of LIVE_PRICING_SOURCES) {
+                try {
+                    return await fetchJsonWithTimeout(url);
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+
+            throw lastError || new Error('无法获取 LiteLLM 定价数据');
+        }
+
+        function rerenderCurrentView() {
+            recalculatePriceExtremes();
+            renderAllCards();
+            sortCards();
+            syncProviderFilterSummary();
+            syncModelFilterSummary();
+            syncProviderCollapseActions();
+        }
+
+        async function initializePricingPage() {
+            const cachedPayload = loadPricingCache();
+
+            if (cachedPayload && cachedPayload.data) {
+                providersData = buildProvidersData(cachedPayload.data);
+                rebuildProviderLookup();
+                rebuildModelLookup();
+                syncCollapsedProviderCardsForCurrentData();
+                rerenderCurrentView();
+
+                const cachedSummary = summarizeProviders();
+                updateStatus(
+                    'snapshot',
+                    `已加载本地缓存，共 ${cachedSummary.providers} 个 provider / ${cachedSummary.models} 个模型，正在刷新实时数据...`,
+                    formatTimeStamp(cachedPayload.updatedAt)
+                );
+            } else {
+                showLoadingMessage('正在从 LiteLLM 拉取完整模型配置...');
+                updateStatus('loading', '正在从 LiteLLM 拉取完整模型配置...', '加载中');
+            }
+
+            try {
+                const result = await loadLivePricing();
+                providersData = buildProvidersData(result.data);
+                rebuildProviderLookup();
+                rebuildModelLookup();
+                syncCollapsedProviderCardsForCurrentData();
+                rerenderCurrentView();
+
+                const updatedAt = result.response.headers.get('last-modified') || new Date().toISOString();
+                savePricingCache(result.data, updatedAt);
+
+                const liveSummary = summarizeProviders();
+                updateStatus(
+                    'live',
+                    `已加载 LiteLLM 完整配置，共 ${liveSummary.providers} 个 provider / ${liveSummary.models} 个可定价文本模型。`,
+                    formatTimeStamp(updatedAt)
+                );
+            } catch (error) {
+                console.error('LiteLLM pricing fetch failed:', error);
+
+                if (providersData.length > 0) {
+                    const cachedSummary = summarizeProviders();
+                    updateStatus(
+                        'snapshot',
+                        `LiteLLM 实时刷新失败，当前继续展示本地缓存，共 ${cachedSummary.providers} 个 provider / ${cachedSummary.models} 个模型。`,
+                        document.getElementById('updated-at').textContent
+                    );
+                } else {
+                    showLoadingMessage('LiteLLM 数据拉取失败，且当前没有可用缓存。请稍后刷新重试。');
+                    updateStatus(
+                        'snapshot',
+                        'LiteLLM 数据拉取失败，且当前没有可用缓存。',
+                        '不可用'
+                    );
+                }
+            }
+        }
+
         document.querySelectorAll('.filter-tag').forEach(tag => {
             tag.addEventListener('click', () => {
-                document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.filter-tag').forEach(item => item.classList.remove('active'));
                 tag.classList.add('active');
                 filterCards();
             });
         });
 
+        document.getElementById('exchange-rate-input').addEventListener('change', handleExchangeRateCommit);
+        document.getElementById('exchange-rate-input').addEventListener('blur', handleExchangeRateCommit);
         document.getElementById('search-input').addEventListener('input', filterCards);
         document.getElementById('sort-select').addEventListener('change', sortCards);
+        document.getElementById('provider-filter-toggle').addEventListener('click', openProviderFilterPanel);
+        document.getElementById('provider-filter-search').addEventListener('input', syncProviderFilterSummary);
+        document.getElementById('apply-provider-filter').addEventListener('click', () => {
+            applyProviderFilter();
+        });
+        document.getElementById('clear-provider-filter').addEventListener('click', () => {
+            clearProviderFilter();
+        });
+        document.getElementById('cancel-provider-filter').addEventListener('click', () => {
+            setProviderFilterPanelOpen(false);
+        });
+        document.getElementById('close-provider-filter').addEventListener('click', () => {
+            setProviderFilterPanelOpen(false);
+        });
+        document.addEventListener('click', event => {
+            const wrap = document.getElementById('provider-filter-wrap');
+            if (wrap && !wrap.contains(event.target)) {
+                setProviderFilterPanelOpen(false);
+            }
+        });
+        document.getElementById('provider-filter-results').addEventListener('change', event => {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.dataset.providerFilterOption !== 'true') {
+                return;
+            }
 
-        // Initialize
-        renderAllCards();
+            if (target.checked) {
+                draftProviderFilter.add(target.value);
+            } else {
+                draftProviderFilter.delete(target.value);
+            }
+
+            syncProviderFilterSummary();
+        });
+        document.getElementById('model-filter-toggle').addEventListener('click', openModelFilterPanel);
+        document.getElementById('model-filter-input').addEventListener('input', syncModelFilterSummary);
+        document.getElementById('apply-model-filter').addEventListener('click', () => {
+            applyModelIdFilter();
+        });
+        document.getElementById('use-selected-models').addEventListener('click', () => {
+            populateModelFilterFromSelection();
+        });
+        document.getElementById('clear-model-filter').addEventListener('click', () => {
+            clearModelIdFilter();
+        });
+        document.getElementById('cancel-model-filter').addEventListener('click', () => {
+            setModelFilterPanelOpen(false);
+        });
+        document.getElementById('close-model-filter').addEventListener('click', () => {
+            setModelFilterPanelOpen(false);
+        });
+        document.getElementById('model-filter-panel').addEventListener('click', event => {
+            if (event.target === event.currentTarget) {
+                setModelFilterPanelOpen(false);
+            }
+        });
+        document.getElementById('model-filter-results').addEventListener('change', event => {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.dataset.modelFilterOption !== 'true') {
+                return;
+            }
+
+            if (target.checked) {
+                draftModelIdFilter.add(target.value);
+            } else {
+                draftModelIdFilter.delete(target.value);
+            }
+
+            syncModelFilterSummary();
+        });
+        document.getElementById('card-grid').addEventListener('change', event => {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.dataset.modelSelect !== 'true') {
+                return;
+            }
+
+            if (target.checked) {
+                selectedModelKeys.add(target.value);
+            } else {
+                selectedModelKeys.delete(target.value);
+            }
+
+            syncModelFilterSummary();
+        });
+        document.getElementById('expand-all-provider-cards').addEventListener('click', () => {
+            expandAllProviderCards();
+        });
+        document.getElementById('collapse-all-provider-cards').addEventListener('click', () => {
+            collapseAllProviderCards();
+        });
+        document.getElementById('card-grid').addEventListener('click', event => {
+            const toggle = event.target.closest('[data-provider-card-toggle]');
+
+            if (!(toggle instanceof HTMLElement)) {
+                return;
+            }
+
+            const providerId = toggle.dataset.providerCardToggle || '';
+            if (!providerId) {
+                return;
+            }
+
+            const nextCollapsed = !collapsedProviderCards.has(providerId);
+            if (nextCollapsed) {
+                collapsedProviderCards.add(providerId);
+            } else {
+                collapsedProviderCards.delete(providerId);
+            }
+            const providerName = providerLookupById.get(providerId)?.name || providerId;
+
+            const card = toggle.closest('.provider-card');
+            if (!(card instanceof HTMLElement)) {
+                return;
+            }
+
+            card.classList.toggle('collapsed', nextCollapsed);
+            toggle.setAttribute('aria-expanded', String(!nextCollapsed));
+            toggle.setAttribute('aria-label', `${nextCollapsed ? '展开' : '收起'} ${providerName} 模型卡片`);
+            const label = toggle.querySelector('.card-collapse-label');
+            if (label) {
+                label.textContent = nextCollapsed ? '展开' : '收起';
+            }
+            syncProviderCollapseActions();
+        });
+        document.getElementById('active-model-filter-tags').addEventListener('click', event => {
+            const button = event.target.closest('[data-remove-model-filter]');
+
+            if (!(button instanceof HTMLElement)) {
+                return;
+            }
+
+            activeModelIdFilter.delete(button.dataset.removeModelFilter || '');
+            draftModelIdFilter = new Set(activeModelIdFilter);
+            syncModelFilterSummary();
+            filterCards();
+        });
+        document.getElementById('clear-active-model-filter').addEventListener('click', () => {
+            clearModelIdFilter();
+        });
+        document.getElementById('active-provider-filter-tags').addEventListener('click', event => {
+            const button = event.target.closest('[data-remove-provider-filter]');
+
+            if (!(button instanceof HTMLElement)) {
+                return;
+            }
+
+            activeProviderFilter.delete(button.dataset.removeProviderFilter || '');
+            draftProviderFilter = new Set(activeProviderFilter);
+            syncProviderFilterSummary();
+            filterCards();
+        });
+        document.getElementById('clear-active-provider-filter').addEventListener('click', () => {
+            clearProviderFilter();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                const providerPanel = document.getElementById('provider-filter-panel');
+                if (providerPanel.classList.contains('open')) {
+                    setProviderFilterPanelOpen(false);
+                    return;
+                }
+
+                const panel = document.getElementById('model-filter-panel');
+                if (panel.classList.contains('open')) {
+                    setModelFilterPanelOpen(false);
+                }
+            }
+        });
+
+        syncExchangeRateInput();
+        syncProviderFilterSummary();
+        syncModelFilterSummary();
+        syncProviderCollapseActions();
+        initializePricingPage();
     </script>
 </body>
 </html>

@@ -2,81 +2,66 @@
 
 ## 简介
 
-这个文档的目的是对比国内外各个厂商的大模型，主要针对文本生成类模型。
+这是一个静态页面项目，用来对比主流文本模型的 API 价格。
 
-对比内容会包括：
+当前页面直接使用 LiteLLM 的完整模型配置，不再维护仓库内的固定模型清单。
+页面会在浏览器端：
 
-- 价格（输入价格、输出价格）
-- 文本/Token 转化率（即将推出）
-- 支持上下文的长度（输入限制、输出限制）
-- 其他一些备注
+1. 读取上一次成功同步到本地缓存的 LiteLLM 数据
+2. 再请求 LiteLLM 最新价格表
+3. 按 provider 自动分组，展示全部可定价的文本模型
 
-大模型厂商：
+## 数据来源
 
-- 国外：OpenAI，Anthropic，Google
-- 国内大厂：阿里通义千问，百度文心，字节豆包
-- 初创：月之暗面 Moonshot，百川智能，智谱，零一万物，Deepseek
+- 主数据源：
+  `https://cdn.jsdelivr.net/gh/BerriAI/litellm@main/model_prices_and_context_window.json`
+- 回退源：
+  `https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json`
+- 最终回退：
+  `https://raw.githubusercontent.com/BerriAI/litellm/main/litellm/model_prices_and_context_window_backup.json`
+- 本地体验兜底：浏览器 `localStorage` 缓存
 
-## 对比列表
+说明：
 
-- 输入输出长度限制，如无特别限制，一般输入输出加起来不超过总的上下文长度即可
-- 美元人民币按 7 计算
+- LiteLLM 价格字段按 `美元 / token` 维护
+- 页面统一换算为 `元 / 百万 Token`
+- 默认换算汇率为 `$1 = ¥7`，并支持在页面头部手动输入
+- 对于 LiteLLM 中的阶梯价模型，页面展示首档起始价格
+- 页面只展示 `mode in {chat, completion, responses}` 且有价格信息的模型
 
-| 厂商         | 模型                  | 输入价格          | 输出价格          | 上下文 Token 长度 | 最大输入 Token | 最大输出 Token |
-| ------------ | --------------------- | ----------------- | ----------------- | ----------------- | -------------- | -------------- |
-| OpenAI       | GPT-5.4               | 17.5 元 ($2.50)   | 105 元 ($15)      | 1M                | -              | 128k           |
-| OpenAI       | GPT-5.4 mini          | 5.25 元 ($0.75)   | 31.5 元 ($4.50)   | 270k              | -              | 128k           |
-| OpenAI       | GPT-5.4 nano          | 1.4 元 ($0.20)    | 8.75 元 ($1.25)   | 270k              | -              | 128k           |
-| Anthropic    | Claude Opus 4.6       | 35 元 ($5)        | 175 元 ($25)      | 1M                | -              | 128k           |
-| Anthropic    | Claude Sonnet 4.6     | 21 元 ($3)        | 105 元 ($15)      | 1M                | -              | 64k            |
-| Anthropic    | Claude Haiku 4.5      | 7 元 ($1)         | 35 元 ($5)        | 200k              | -              | 64k            |
-| Google       | Gemini 3.1 Pro        | 14 元 ($2)        | 84 元 ($12)       | 1M                | -              | 64k            |
-| Google       | Gemini 3 Flash        | 3.5 元 ($0.50)    | 21 元 ($3)        | 1M                | -              | 64k            |
-| Google       | Gemini 2.5 Pro        | 8.75 元 ($1.25)   | 70 元 ($10)       | 1M                | -              | 64k            |
-| Google       | Gemini 2.5 Flash      | 2.1 元 ($0.30)    | 17.5 元 ($2.50)   | 1M                | -              | 64k            |
-| Google       | Gemini 2.5 Flash-Lite | 0.7 元 ($0.10)    | 2.8 元 ($0.40)    | 1M                | -              | -              |
-| Deepseek     | deepseek-chat         | 1.96 元 ($0.28)   | 2.94 元 ($0.42)   | 128k              | -              | 8k             |
-| Deepseek     | deepseek-reasoner     | 1.96 元 ($0.28)   | 2.94 元 ($0.42)   | 128k              | -              | 64k            |
-| 阿里通义千问 | qwen3.5-plus          | 0.8 元            | 4.8 元            | 1M                | 1M             | -              |
-| 阿里通义千问 | qwen3-max             | 2.5 元            | 10 元             | 252k              | 250k           | 16k            |
-| 阿里通义千问 | qwen-plus             | 0.8 元            | 2 元              | 1M                | 1M             | 8k             |
-| 字节豆包     | Doubao-Seed-2.0-Pro   | 3.2 元            | 16 元             | 256k              | -              | -              |
-| 字节豆包     | Doubao-Seed-2.0-Lite  | 0.6 元            | 3.6 元            | 256k              | -              | -              |
-| 月之暗面     | kimi-k2.5             | 4 元              | 21 元             | 256k              | -              | -              |
-| 月之暗面     | Kimi K2               | 4 元              | 16 元             | 256k              | -              | -              |
-| 百川智能     | Baichuan-M3-Plus      | 5 元              | 9 元              | 32k               | -              | -              |
-| 百川智能     | Baichuan4-Air         | 0.98 元           | 0.98 元           | 32k               | -              | -              |
-| 智谱         | GLM-5                 | 4 元              | 18 元             | 200k              | -              | -              |
-| 智谱         | GLM-4-Flash           | 免费              | 免费              | 128k              | -              | 8k             |
-| 零一万物     | yi-lightning          | 1 元              | 1 元              | 16k               | -              | -              |
-| 百度文心     | ERNIE-5.0             | 6 元              | 24 元             | 32k               | -              | -              |
-| 百度文心     | ERNIE-4.5-Turbo       | 0.8 元            | 3.2 元            | 128k              | -              | -              |
-| 百度文心     | ERNIE-Speed           | 免费              | 免费              | 8k                | -              | -              |
+## 展示逻辑
+
+- 不再手工指定模型列表
+- 所有模型都从 LiteLLM 配置动态生成
+- 按 `litellm_provider` 分组展示
+- 顶部筛选按 provider 类型粗分为：
+  - 官方/直连
+  - 云平台
+  - 聚合/托管
 
 ## 参考
 
-- OpenAI: [https://openai.com/api/pricing/](https://openai.com/api/pricing/)
-- Anthropic: [https://claude.com/pricing](https://claude.com/pricing)
-- Google: [https://ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing)
-- Deepseek: [https://api-docs.deepseek.com/quick_start/pricing](https://api-docs.deepseek.com/quick_start/pricing)
-- 阿里通义千问：[https://help.aliyun.com/zh/model-studio/model-pricing](https://help.aliyun.com/zh/model-studio/model-pricing)
-- 字节豆包：[https://www.volcengine.com/docs/82379/1544106](https://www.volcengine.com/docs/82379/1544106)
-- 月之暗面：[https://platform.moonshot.cn/docs/pricing/chat](https://platform.moonshot.cn/docs/pricing/chat)
-- 百川智能：[https://platform.baichuan-ai.com/price](https://platform.baichuan-ai.com/price)
-- 智谱：[https://bigmodel.cn/pricing](https://bigmodel.cn/pricing)
-- 零一万物：[https://platform.lingyiwanwu.com/docs](https://platform.lingyiwanwu.com/docs)
-- 百度文心：[https://cloud.baidu.com/doc/WENXINWORKSHOP/s/clntwmv7t](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/clntwmv7t)
+- LiteLLM Models:
+  [https://models.litellm.ai/](https://models.litellm.ai/)
+- LiteLLM cost map:
+  [https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json](https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json)
+- LiteLLM backup cost map:
+  [https://github.com/BerriAI/litellm/blob/main/litellm/model_prices_and_context_window_backup.json](https://github.com/BerriAI/litellm/blob/main/litellm/model_prices_and_context_window_backup.json)
 
 ## 问题
 
-1. 希望增加更多的模型价格？
+1. 希望增加新的筛选方式或字段？
 
-请在这里提交 [https://github.com/flanker/llmprice.cn/issues/new](https://github.com/flanker/llmprice.cn/issues/new) 我会更新
+请在这里提交
+[https://github.com/flanker/llmprice.cn/issues/new](https://github.com/flanker/llmprice.cn/issues/new)
+我会更新。
 
-2. 价格/上下文长度有错误？
+2. 价格或上下文长度显示有问题？
 
-请在这里提交 [https://github.com/flanker/llmprice.cn/issues/new](https://github.com/flanker/llmprice.cn/issues/new) 我会更新。多谢。🙏
+请在这里提交
+[https://github.com/flanker/llmprice.cn/issues/new](https://github.com/flanker/llmprice.cn/issues/new)
+我会更新。多谢。
 
 3. 最后更新时间
 
-2026-03-20
+2026-03-30
