@@ -61,7 +61,3 @@
 请在这里提交
 [https://github.com/flanker/llmprice.cn/issues/new](https://github.com/flanker/llmprice.cn/issues/new)
 我会更新。多谢。
-
-3. 最后更新时间
-
-2026-03-30
