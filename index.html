@@ -233,13 +233,115 @@
             box-shadow: 0 0 0 3px var(--accent-blue-light);
         }
 
-        .search-box svg {
+        .search-box > svg {
             position: absolute;
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
             width: 16px;
             height: 16px;
+            color: var(--text-tertiary);
+        }
+
+        /* Opaque on purpose: the toolbar sets its own backdrop-filter, which
+           becomes the backdrop root for anything nested inside it, so a
+           translucent panel here would let the cards underneath show through. */
+        .search-suggestions {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            min-width: 320px;
+            max-height: 360px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 6px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+            display: none;
+            z-index: 240;
+        }
+
+        .search-suggestions.open {
+            display: block;
+        }
+
+        .search-suggestion-group {
+            padding: 8px 12px 4px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .search-suggestion {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 11px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .search-suggestion:hover,
+        .search-suggestion.active {
+            background: var(--accent-blue-light);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .search-suggestion-brand {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: var(--text-tertiary);
+        }
+
+        .search-suggestion-main {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .search-suggestion-label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-suggestion-label mark {
+            background: transparent;
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .search-suggestion-meta {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-suggestion-price {
+            flex-shrink: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent-green);
+        }
+
+        .search-suggestion-footer {
+            padding: 8px 12px;
+            border-top: 1px solid var(--border-light);
+            margin-top: 4px;
+            font-size: 0.7rem;
             color: var(--text-tertiary);
         }
 
@@ -1327,7 +1429,17 @@
                     <div class="search-sort">
                         <div class="search-box">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            <input type="text" id="search-input" placeholder="搜索 provider 或模型 key...">
+                            <input
+                                type="text"
+                                id="search-input"
+                                placeholder="搜索 provider 或模型 key..."
+                                role="combobox"
+                                autocomplete="off"
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-controls="search-suggestions"
+                            >
+                            <div class="search-suggestions" id="search-suggestions" role="listbox" aria-label="搜索建议"></div>
                         </div>
                         <select class="sort-select" id="sort-select">
                             <option value="default">默认排序</option>
@@ -2596,6 +2708,191 @@
                 : `${totalCount} 个模型`;
         }
 
+        const MAX_PROVIDER_SUGGESTIONS = 3;
+        const MAX_MODEL_SUGGESTIONS = 8;
+        // "opus" matches 95 models, 13 of them Anthropic's — ranking on match
+        // quality alone fills every slot with one provider's dated variants.
+        // This page exists to compare the same model across providers, so cap
+        // each provider and let the rest of the list show who else carries it.
+        const MAX_MODEL_SUGGESTIONS_PER_PROVIDER = 2;
+        let suggestionItems = [];
+        let activeSuggestionIndex = -1;
+
+        function highlightMatch(text, term) {
+            const at = text.toLowerCase().indexOf(term);
+            if (at < 0) {
+                return escapeHtml(text);
+            }
+
+            return escapeHtml(text.slice(0, at))
+                + `<mark>${escapeHtml(text.slice(at, at + term.length))}</mark>`
+                + escapeHtml(text.slice(at + term.length));
+        }
+
+        // A term that starts the key is what the user is most likely reaching for,
+        // so rank those first; among equals prefer the shorter key ("claude-opus-4"
+        // over "claude-opus-4-20250514") and priced models over unpriced ones.
+        function rankByMatch(term, getKey) {
+            return (left, right) => {
+                const leftAt = getKey(left).indexOf(term);
+                const rightAt = getKey(right).indexOf(term);
+                if (leftAt !== rightAt) {
+                    return leftAt - rightAt;
+                }
+
+                const leftPriced = left.hasInputPrice || left.hasOutputPrice;
+                const rightPriced = right.hasInputPrice || right.hasOutputPrice;
+                if (leftPriced !== rightPriced) {
+                    return leftPriced ? -1 : 1;
+                }
+
+                return getKey(left).length - getKey(right).length;
+            };
+        }
+
+        function buildSearchSuggestions(term) {
+            const providers = providersData
+                .filter(provider => provider.searchText.includes(term))
+                .sort(rankByMatch(term, provider => provider.searchText))
+                .slice(0, MAX_PROVIDER_SUGGESTIONS);
+
+            const matchedModels = flatModelOptions.filter(model => model.searchText.includes(term));
+            const perProvider = new Map();
+            const models = [];
+
+            matchedModels
+                .sort(rankByMatch(term, model => model.normalizedKey))
+                .forEach(model => {
+                    const taken = perProvider.get(model.providerId) || 0;
+                    if (models.length >= MAX_MODEL_SUGGESTIONS || taken >= MAX_MODEL_SUGGESTIONS_PER_PROVIDER) {
+                        return;
+                    }
+
+                    perProvider.set(model.providerId, taken + 1);
+                    models.push(model);
+                });
+
+            return { providers, models, hiddenModelCount: matchedModels.length - models.length };
+        }
+
+        function renderSearchSuggestions(term) {
+            const panel = document.getElementById('search-suggestions');
+            const { providers, models, hiddenModelCount } = buildSearchSuggestions(term);
+
+            suggestionItems = [
+                ...providers.map(provider => ({ type: 'provider', value: provider.id, source: provider })),
+                ...models.map(model => ({ type: 'model', value: model.key, source: model }))
+            ];
+
+            if (suggestionItems.length === 0) {
+                closeSearchSuggestions();
+                return;
+            }
+
+            let index = -1;
+            const renderProvider = provider => {
+                index += 1;
+                return `
+                    <div class="search-suggestion" role="option" aria-selected="false" id="search-suggestion-${index}" data-suggestion-index="${index}">
+                        ${renderBrandGlyph(provider.brandSlug, 'search-suggestion-brand', true)}
+                        <span class="search-suggestion-main">
+                            <span class="search-suggestion-label">${highlightMatch(provider.name, term)}</span>
+                            <span class="search-suggestion-meta">${escapeHtml(provider.id)} · ${escapeHtml(provider.categoryLabel)} · ${provider.models.length} 个模型</span>
+                        </span>
+                    </div>
+                `;
+            };
+
+            const renderModel = model => {
+                index += 1;
+                const price = model.hasInputTokenPrice
+                    ? `<span class="search-suggestion-price">${formatNumber(model.inputPrice)}元</span>`
+                    : '';
+                return `
+                    <div class="search-suggestion" role="option" aria-selected="false" id="search-suggestion-${index}" data-suggestion-index="${index}">
+                        ${renderBrandGlyph(model.brandSlug, 'search-suggestion-brand', true)}
+                        <span class="search-suggestion-main">
+                            <span class="search-suggestion-label">${highlightMatch(model.key, term)}</span>
+                            <span class="search-suggestion-meta">${escapeHtml(model.providerName)}</span>
+                        </span>
+                        ${price}
+                    </div>
+                `;
+            };
+
+            panel.innerHTML = [
+                providers.length > 0 ? `<div class="search-suggestion-group">厂商</div>${providers.map(renderProvider).join('')}` : '',
+                models.length > 0 ? `<div class="search-suggestion-group">模型</div>${models.map(renderModel).join('')}` : '',
+                hiddenModelCount > 0 ? `<div class="search-suggestion-footer">还有 ${hiddenModelCount} 个模型匹配，直接回车查看全部</div>` : ''
+            ].join('');
+
+            panel.classList.add('open');
+            document.getElementById('search-input').setAttribute('aria-expanded', 'true');
+            setActiveSuggestion(-1);
+        }
+
+        function closeSearchSuggestions() {
+            const input = document.getElementById('search-input');
+            document.getElementById('search-suggestions').classList.remove('open');
+            input.setAttribute('aria-expanded', 'false');
+            input.removeAttribute('aria-activedescendant');
+            suggestionItems = [];
+            activeSuggestionIndex = -1;
+        }
+
+        function setActiveSuggestion(nextIndex) {
+            const panel = document.getElementById('search-suggestions');
+            const input = document.getElementById('search-input');
+            activeSuggestionIndex = nextIndex;
+
+            panel.querySelectorAll('.search-suggestion').forEach(node => {
+                const isActive = Number(node.dataset.suggestionIndex) === nextIndex;
+                node.classList.toggle('active', isActive);
+                node.setAttribute('aria-selected', String(isActive));
+                if (isActive) {
+                    node.scrollIntoView({ block: 'nearest' });
+                    input.setAttribute('aria-activedescendant', node.id);
+                }
+            });
+
+            if (nextIndex < 0) {
+                input.removeAttribute('aria-activedescendant');
+            }
+        }
+
+        function moveActiveSuggestion(delta) {
+            if (suggestionItems.length === 0) {
+                return;
+            }
+
+            const count = suggestionItems.length;
+            const next = activeSuggestionIndex < 0 && delta < 0
+                ? count - 1
+                : (activeSuggestionIndex + delta + count) % count;
+
+            setActiveSuggestion(next);
+        }
+
+        function applySuggestion(item) {
+            const input = document.getElementById('search-input');
+            // The card filter already treats a provider term and a model term
+            // differently, so handing it the raw id/key is all that is needed.
+            input.value = item.value;
+            closeSearchSuggestions();
+            filterCards();
+        }
+
+        function refreshSearchSuggestions() {
+            const term = document.getElementById('search-input').value.trim().toLowerCase();
+
+            if (term.length === 0) {
+                closeSearchSuggestions();
+                return;
+            }
+
+            renderSearchSuggestions(term);
+        }
+
         function filterCards() {
             const activeFilter = document.querySelector('.filter-tag.active').dataset.filter;
             const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
@@ -2818,7 +3115,42 @@
 
         document.getElementById('exchange-rate-input').addEventListener('change', handleExchangeRateCommit);
         document.getElementById('exchange-rate-input').addEventListener('blur', handleExchangeRateCommit);
-        document.getElementById('search-input').addEventListener('input', filterCards);
+        document.getElementById('search-input').addEventListener('input', () => {
+            filterCards();
+            refreshSearchSuggestions();
+        });
+        document.getElementById('search-input').addEventListener('focus', refreshSearchSuggestions);
+        document.getElementById('search-input').addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (suggestionItems.length === 0) {
+                    refreshSearchSuggestions();
+                    return;
+                }
+                moveActiveSuggestion(event.key === 'ArrowDown' ? 1 : -1);
+                return;
+            }
+
+            if (event.key === 'Enter' && activeSuggestionIndex >= 0) {
+                event.preventDefault();
+                applySuggestion(suggestionItems[activeSuggestionIndex]);
+                return;
+            }
+
+            if (event.key === 'Enter' || event.key === 'Escape' || event.key === 'Tab') {
+                closeSearchSuggestions();
+            }
+        });
+        document.getElementById('search-suggestions').addEventListener('mousedown', event => {
+            // mousedown, not click: the input's blur would tear the panel down first.
+            const option = event.target.closest('.search-suggestion');
+            if (!option) {
+                return;
+            }
+
+            event.preventDefault();
+            applySuggestion(suggestionItems[Number(option.dataset.suggestionIndex)]);
+        });
         document.getElementById('sort-select').addEventListener('change', sortCards);
         document.getElementById('provider-filter-toggle').addEventListener('click', openProviderFilterPanel);
         document.getElementById('provider-filter-search').addEventListener('input', syncProviderFilterSummary);
@@ -2838,6 +3170,11 @@
             const wrap = document.getElementById('provider-filter-wrap');
             if (wrap && !wrap.contains(event.target)) {
                 setProviderFilterPanelOpen(false);
+            }
+
+            const searchBox = document.getElementById('search-input').closest('.search-box');
+            if (searchBox && !searchBox.contains(event.target)) {
+                closeSearchSuggestions();
             }
         });
         document.getElementById('provider-filter-results').addEventListener('change', event => {
