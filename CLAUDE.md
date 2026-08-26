@@ -37,6 +37,7 @@ Prices are loaded client-side, so visitors always see current data without any c
 2. It then fetches the latest LiteLLM cost map (CDN source, with raw-GitHub and backup fallbacks).
 3. Models are grouped by `litellm_provider`; only entries with pricing and `mode in {chat, completion, responses}` are shown.
 4. LiteLLM maintains `USD / token`; the page converts to `元 / 百万 Token` at a default `$1 = ¥7` (adjustable in the page header). Tiered-price models show the first tier.
+5. LiteLLM writes `0` both for genuinely free models and for models it has no price for, and the two are indistinguishable. A `0` is therefore never rendered as a price — the cell shows 「暂无」 with a tooltip instead of `0 元`/「免费」, and such models sort to the bottom of their provider card and are excluded from the cheapest-price sort. Models priced per request (`input_cost_per_request`, e.g. the Perplexity online models) show `元/次` in the input column.
 
 To change behavior (display logic, conversion rate, filters, data sources), edit the inline script in `index.html`. The data source endpoints are defined near the top of that script (`PRICING_SOURCES`).
 

@@ -1005,9 +1005,19 @@
             font-weight: 500;
         }
 
-        .price-free {
-            color: var(--accent-purple);
-            font-weight: 600;
+        .price-unknown {
+            color: var(--text-tertiary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-bottom: 1px dashed var(--border-color);
+            cursor: help;
+        }
+
+        .price-unknown-mark {
+            font-size: 0.7rem;
+            margin-left: 2px;
+            opacity: 0.75;
         }
 
         .context-length {
@@ -1407,6 +1417,7 @@
             'https://raw.githubusercontent.com/BerriAI/litellm/main/litellm/model_prices_and_context_window_backup.json'
         ];
         const TEXT_MODES = new Set(['chat', 'completion', 'responses']);
+        const UNKNOWN_PRICE_HINT = 'LiteLLM 未收录该模型的这项价格（上游数据里记为 0），并不代表免费，请以厂商官方定价为准。';
 
         const OFFICIAL_PROVIDERS = new Set([
             'openai', 'anthropic', 'gemini', 'deepseek', 'dashscope', 'moonshot', 'zai',
@@ -1473,6 +1484,14 @@
             maximumFractionDigits: 2
         });
 
+        const requestPriceFormatter = new Intl.NumberFormat('zh-CN', {
+            maximumFractionDigits: 4
+        });
+
+        const smallPriceFormatter = new Intl.NumberFormat('zh-CN', {
+            maximumSignificantDigits: 2
+        });
+
         const timeFormatter = new Intl.DateTimeFormat('zh-CN', {
             year: 'numeric',
             month: '2-digit',
@@ -1512,7 +1531,15 @@
         }
 
         function formatNumber(value) {
+            // Keep sub-cent prices readable instead of rounding a real price down to 0.
+            if (value > 0 && value < 0.005) {
+                return smallPriceFormatter.format(value);
+            }
             return priceFormatter.format(value);
+        }
+
+        function formatRequestPrice(value) {
+            return requestPriceFormatter.format(value);
         }
 
         function formatTokenCount(tokenCount) {
@@ -1920,6 +1947,11 @@
             };
         }
 
+        function extractRequestCost(entry) {
+            const value = entry.input_cost_per_request;
+            return typeof value === 'number' && value > 0 ? value : 0;
+        }
+
         function extractPricing(entry) {
             if (!entry) {
                 return null;
@@ -1929,6 +1961,7 @@
                 return {
                     inputCostPerToken: entry.input_cost_per_token,
                     outputCostPerToken: entry.output_cost_per_token,
+                    inputCostPerRequest: extractRequestCost(entry),
                     isTiered: false
                 };
             }
@@ -1939,6 +1972,7 @@
                     return {
                         inputCostPerToken: firstTier.input_cost_per_token,
                         outputCostPerToken: firstTier.output_cost_per_token,
+                        inputCostPerRequest: extractRequestCost(entry),
                         isTiered: true
                     };
                 }
@@ -1976,17 +2010,28 @@
             const pricing = extractPricing(entry);
             const inputUsd = pricing.inputCostPerToken * TOKENS_PER_MILLION;
             const outputUsd = pricing.outputCostPerToken * TOKENS_PER_MILLION;
+            const requestUsd = pricing.inputCostPerRequest;
             const providerId = entry.litellm_provider || 'unknown';
+
+            // LiteLLM stores 0 both for genuinely free models and for models it simply has no
+            // price for, so a 0 is never rendered as a price - see hasInputPrice/hasOutputPrice.
+            const hasInputTokenPrice = inputUsd > 0;
+            const hasRequestPrice = requestUsd > 0;
 
             return {
                 name: buildDisplayName(modelKey, providerId),
                 key: modelKey,
                 inputPrice: inputUsd * usdToCnyRate,
                 outputPrice: outputUsd * usdToCnyRate,
+                requestPrice: requestUsd * usdToCnyRate,
                 inputUsd,
                 outputUsd,
+                requestUsd,
                 context: formatTokenCount(entry.max_input_tokens || entry.max_tokens || null),
-                isFree: inputUsd === 0 && outputUsd === 0,
+                hasInputTokenPrice,
+                hasRequestPrice,
+                hasInputPrice: hasInputTokenPrice || hasRequestPrice,
+                hasOutputPrice: outputUsd > 0,
                 isTiered: pricing.isTiered,
                 normalizedKey: modelKey.toLowerCase(),
                 searchText: `${providerId} ${modelKey} ${buildDisplayName(modelKey, providerId)}`.toLowerCase()
@@ -2031,8 +2076,10 @@
                 .map(provider => ({
                     ...provider,
                     models: provider.models.sort((left, right) => {
-                        if (left.isFree !== right.isFree) {
-                            return left.isFree ? 1 : -1;
+                        const leftPriced = left.hasInputPrice || left.hasOutputPrice;
+                        const rightPriced = right.hasInputPrice || right.hasOutputPrice;
+                        if (leftPriced !== rightPriced) {
+                            return leftPriced ? -1 : 1;
                         }
                         if (left.inputPrice !== right.inputPrice) {
                             return left.inputPrice - right.inputPrice;
@@ -2084,8 +2131,10 @@
 
             providersData.forEach(provider => {
                 provider.models.forEach(model => {
-                    if (!model.isFree) {
+                    if (model.hasInputTokenPrice) {
                         maxInputPrice = Math.max(maxInputPrice, model.inputPrice);
+                    }
+                    if (model.hasOutputPrice) {
                         maxOutputPrice = Math.max(maxOutputPrice, model.outputPrice);
                     }
                 });
@@ -2106,6 +2155,7 @@
                 provider.models.forEach(model => {
                     model.inputPrice = model.inputUsd * usdToCnyRate;
                     model.outputPrice = model.outputUsd * usdToCnyRate;
+                    model.requestPrice = model.requestUsd * usdToCnyRate;
                 });
             });
 
@@ -2178,30 +2228,43 @@
             return collapsedProviderCards.has(providerId);
         }
 
+        function renderUnknownPrice() {
+            return `<span class="price-unknown" title="${escapeHtml(UNKNOWN_PRICE_HINT)}">暂无<span class="price-unknown-mark" aria-hidden="true">ⓘ</span></span>`;
+        }
+
         function renderCard(provider) {
             const isCollapsed = isProviderCardCollapsed(provider.id);
             const modelRows = provider.models.map(model => {
-                const inputBarWidth = model.isFree || maxInputPrice === 0 ? 0 : (model.inputPrice / maxInputPrice * 100);
-                const outputBarWidth = model.isFree || maxOutputPrice === 0 ? 0 : (model.outputPrice / maxOutputPrice * 100);
+                const inputBarWidth = !model.hasInputTokenPrice || maxInputPrice === 0 ? 0 : (model.inputPrice / maxInputPrice * 100);
+                const outputBarWidth = !model.hasOutputPrice || maxOutputPrice === 0 ? 0 : (model.outputPrice / maxOutputPrice * 100);
                 const suffix = model.isTiered ? ' 起' : '';
 
                 let inputPriceHtml;
                 let outputPriceHtml;
 
-                if (model.isFree) {
-                    inputPriceHtml = '<span class="price-free">免费</span>';
-                    outputPriceHtml = '<span class="price-free">免费</span>';
-                } else {
+                if (model.hasInputTokenPrice) {
                     inputPriceHtml = `
                         <span class="price-input">${formatNumber(model.inputPrice)}元${suffix}</span>
                         <span class="price-usd">($${formatNumber(model.inputUsd)})</span>
                         <div class="price-bar"><div class="price-bar-fill input" style="width: ${inputBarWidth}%"></div></div>
                     `;
+                } else if (model.hasRequestPrice) {
+                    inputPriceHtml = `
+                        <span class="price-input">${formatRequestPrice(model.requestPrice)}元/次</span>
+                        <span class="price-usd">($${formatRequestPrice(model.requestUsd)}/次)</span>
+                    `;
+                } else {
+                    inputPriceHtml = renderUnknownPrice();
+                }
+
+                if (model.hasOutputPrice) {
                     outputPriceHtml = `
                         <span class="price-output">${formatNumber(model.outputPrice)}元${suffix}</span>
                         <span class="price-usd">($${formatNumber(model.outputUsd)})</span>
                         <div class="price-bar"><div class="price-bar-fill output" style="width: ${outputBarWidth}%"></div></div>
                     `;
+                } else {
+                    outputPriceHtml = renderUnknownPrice();
                 }
 
                 return `
@@ -2350,7 +2413,7 @@
 
         function getComparablePrice(provider, type) {
             const prices = provider.models
-                .filter(model => !model.isFree)
+                .filter(model => type === 'input' ? model.hasInputTokenPrice : model.hasOutputPrice)
                 .map(model => type === 'input' ? model.inputPrice : model.outputPrice);
 
             return prices.length > 0 ? Math.min(...prices) : Infinity;
