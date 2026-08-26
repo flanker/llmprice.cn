@@ -909,6 +909,15 @@
             font-weight: 500;
         }
 
+        /* While a search or model filter is narrowing the rows this badge stops
+           counting the provider's catalogue and starts counting matches. The
+           card is usually collapsed, so the number is all the user gets — tint
+           it so the changed meaning is visible without reading it twice. */
+        .model-count.narrowed {
+            background: var(--accent-blue-light);
+            color: var(--accent-blue);
+        }
+
         .card-collapse-toggle {
             display: inline-flex;
             align-items: center;
@@ -2553,9 +2562,12 @@
 
             const totalCount = Number(counter.dataset.modelCount || 0);
 
+            // "13 / 26 个模型" reads as a fraction, a page number, or a score —
+            // nothing in it says which half is the match count.
             counter.textContent = isNarrowed
-                ? `${visibleModelCount} / ${totalCount} 个模型`
+                ? `命中 ${visibleModelCount} / 共 ${totalCount}`
                 : `${totalCount} 个模型`;
+            counter.classList.toggle('narrowed', isNarrowed);
         }
 
         function filterCards() {
