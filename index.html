@@ -818,6 +818,15 @@
             display: none;
         }
 
+        /* An expanded card holds a five-column table that does not fit a 448px
+           grid column, and grid row height is driven by the tallest item — so an
+           expanded card would stretch its row-mates to match it (expanding
+           OpenAI's 116 models left two 12500px-tall blank cards beside it).
+           Giving it the whole row fixes both: full table width, nothing stretched. */
+        .provider-card:not(.collapsed) {
+            grid-column: 1 / -1;
+        }
+
         @keyframes fadeInUp {
             to {
                 opacity: 1;
@@ -1175,7 +1184,36 @@
                 justify-content: center;
             }
 
-            .toolbar-actions,
+            /* The toolbar buttons stay on wrapped rows. Stacking them gave each
+               button a full-width row of its own, which pushed the first
+               provider card below the fold on a phone. */
+            .toolbar-actions {
+                justify-content: flex-start;
+            }
+
+            .search-sort {
+                flex: 1 1 100%;
+            }
+
+            .search-box {
+                flex: 1;
+                min-width: 0;
+            }
+
+            /* The dropdown is anchored to its trigger. Now that the trigger is
+               only as wide as its label, a 342px panel hanging off `right: 0`
+               runs past the left edge of the screen — so anchor it to the
+               toolbar instead and open it as a sheet under the controls. */
+            .provider-filter-dropdown-wrap {
+                position: static;
+            }
+
+            .provider-filter-dropdown {
+                left: 16px;
+                right: 16px;
+                width: auto;
+            }
+
             .model-filter-body,
             .model-filter-header,
             .model-filter-results-header,
