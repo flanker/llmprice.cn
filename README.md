@@ -43,6 +43,20 @@
   - 云平台
   - 聚合/托管
 
+## 品牌图标
+
+- 每个 provider 卡片展示对应厂商的品牌 logo
+- 每个模型行在模型 ID 前展示该模型所属模型家族的图标，
+  因此 Bedrock、OpenRouter 这类聚合平台的卡片里，
+  可以直接看出哪些是 Claude、Llama、Mistral 模型
+- 图标数据放在 `assets/brand-icons.js`，
+  由 `tools/build-brand-icons.py` 生成，请勿手工修改
+- 未收录的厂商仍沿用原来的渐变色块 + 首字母缩写
+- 图标来源：
+  [Lobe Icons](https://github.com/lobehub/lobe-icons)（MIT）、
+  [Simple Icons](https://github.com/simple-icons/simple-icons)（CC0）；
+  各品牌 logo 版权归其所有者，此处仅用于标识对应厂商与模型
+
 ## 参考
 
 - LiteLLM Models:

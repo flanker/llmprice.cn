@@ -626,6 +626,21 @@
             color: var(--text-tertiary);
         }
 
+        .model-filter-option-brand {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            color: var(--text-tertiary);
+        }
+
+        .toolbar-filter-chip-brand {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            color: var(--text-tertiary);
+        }
+
         .model-filter-empty {
             padding: 18px 16px;
             border-radius: 14px;
@@ -856,6 +871,12 @@
             flex-shrink: 0;
         }
 
+        .provider-logo-glyph {
+            width: 27px;
+            height: 27px;
+            display: block;
+        }
+
         .provider-info {
             flex: 1;
         }
@@ -974,6 +995,15 @@
             height: 16px;
             accent-color: var(--accent-blue);
             cursor: pointer;
+        }
+
+        .model-brand-icon {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            margin-right: 5px;
+            vertical-align: -3px;
+            color: var(--text-tertiary);
         }
 
         .model-name {
@@ -1397,6 +1427,7 @@
                 <div class="footer-links">
                     <a href="https://models.litellm.ai/" target="_blank" rel="noreferrer">LiteLLM Models</a>
                     <a href="https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json" target="_blank" rel="noreferrer">LiteLLM Cost Map</a>
+                    <a href="https://github.com/lobehub/lobe-icons" target="_blank" rel="noreferrer">品牌图标 Lobe Icons</a>
                 </div>
                 <a href="https://github.com/flanker/llmprice.cn" target="_blank" rel="noreferrer" class="github-link">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
@@ -1406,6 +1437,7 @@
         </div>
     </footer>
 
+    <script src="assets/brand-icons.js"></script>
     <script>
         const DEFAULT_USD_TO_CNY = 7;
         const TOKENS_PER_MILLION = 1000000;
@@ -1479,6 +1511,112 @@
             xai: 'xAI',
             zai: 'Z.AI'
         };
+
+        // Brand marks come from assets/brand-icons.js; without it every card just keeps
+        // its generated gradient tile and the two-letter fallback.
+        const BRAND_ICONS = window.BRAND_ICONS || {};
+
+        // litellm_provider -> brand mark. Suffixed variants (bedrock_converse,
+        // vertex_ai-anthropic_models, ...) fall back to their parent, so only the
+        // parent needs an entry here.
+        const PROVIDER_BRANDS = {
+            ai21: 'ai21',
+            amazon_nova: 'aws',
+            anthropic: 'anthropic',
+            anyscale: 'anyscale',
+            azure: 'azure',
+            azure_ai: 'azureai',
+            azure_text: 'azure',
+            baseten: 'baseten',
+            bedrock: 'bedrock',
+            cerebras: 'cerebras',
+            chatgpt: 'openai',
+            cloudflare: 'cloudflare',
+            cloudflare_ai: 'cloudflare',
+            codestral: 'mistral',
+            cohere: 'cohere',
+            cohere_chat: 'cohere',
+            crusoe: 'crusoe',
+            dashscope: 'qwen',
+            databricks: 'databricks',
+            deepinfra: 'deepinfra',
+            deepseek: 'deepseek',
+            featherless_ai: 'featherless',
+            fireworks_ai: 'fireworks',
+            friendliai: 'friendli',
+            gemini: 'gemini',
+            github_copilot: 'githubcopilot',
+            groq: 'groq',
+            hyperbolic: 'hyperbolic',
+            inception: 'inception',
+            lambda_ai: 'lambda',
+            meta: 'meta',
+            meta_llama: 'meta',
+            minimax: 'minimax',
+            mistral: 'mistral',
+            moonshot: 'kimi',
+            morph: 'morph',
+            nebius: 'nebius',
+            novita: 'novita',
+            nvidia_nim: 'nvidia',
+            ollama: 'ollama',
+            openai: 'openai',
+            openrouter: 'openrouter',
+            palm: 'palm',
+            perplexity: 'perplexity',
+            replicate: 'replicate',
+            sagemaker: 'aws',
+            sambanova: 'sambanova',
+            snowflake: 'snowflake',
+            tencent: 'tencent',
+            together_ai: 'together',
+            v0: 'v0',
+            vercel_ai_gateway: 'vercel',
+            vertex_ai: 'vertexai',
+            volcengine: 'volcengine',
+            watsonx: 'ibm',
+            xai: 'xai',
+            zai: 'zai',
+            'text-completion-codestral': 'mistral',
+            'text-completion-inception': 'inception',
+            'text-completion-openai': 'openai'
+        };
+
+        // Model key -> brand mark, first match wins. Matching runs against the whole
+        // lowercased key so vendor- and region-prefixed ids (us.anthropic.claude-...,
+        // bedrock/meta.llama3-...) land on the family that actually built the model.
+        const MODEL_BRANDS = [
+            [/claude/, 'claude'],
+            [/nemotron/, 'nvidia'],
+            [/deepseek/, 'deepseek'],
+            [/qwen|qwq|qvq/, 'qwen'],
+            [/mi[sx]tral|ministral|codestral|devstral|magistral|pixtral|voxtral/, 'mistral'],
+            [/llama|(^|[/._-])l3[-.]/, 'meta'],
+            [/gemini/, 'gemini'],
+            [/gemma/, 'gemma'],
+            [/bison|gecko|medlm|unicorn/, 'palm'],
+            [/grok/, 'xai'],
+            [/glm/, 'zai'],
+            [/kimi|moonshot/, 'kimi'],
+            [/minimax|abab/, 'minimax'],
+            [/command|c4ai|(^|[/._-])aya(-|$)/, 'cohere'],
+            [/jamba|jurassic|(^|[/._-])j2-/, 'ai21'],
+            [/amazon|titan|(^|[/._-])nova[-.]/, 'aws'],
+            [/(^|[/._-])phi-?\d|(^|[/._-])mai-/, 'microsoft'],
+            [/granite/, 'ibm'],
+            [/sonar|pplx/, 'perplexity'],
+            [/ernie/, 'wenxin'],
+            [/doubao|skylark|(^|[/._-])seed-/, 'doubao'],
+            [/hunyuan/, 'hunyuan'],
+            [/(^|[/._-])yi-/, 'yi'],
+            [/dbrx|databricks/, 'databricks'],
+            [/arctic|snowflake/, 'snowflake'],
+            [/mercury/, 'inception'],
+            [/(^|[/._-])morph-|morph\//, 'morph'],
+            [/(^|[/._-])v0-/, 'v0'],
+            [/(^|[/._-])together/, 'together'],
+            [/gpt|chatgpt|openai|codex|davinci|babbage|(^|[/.])o[1-9](-|$)/, 'openai']
+        ];
 
         const priceFormatter = new Intl.NumberFormat('zh-CN', {
             maximumFractionDigits: 2
@@ -1584,7 +1722,55 @@
             return Math.abs(hash);
         }
 
-        function buildProviderLogoStyle(providerId) {
+        function shadeHexColor(hex, ratio) {
+            const channels = [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16));
+            return `#${channels
+                .map(channel => Math.round(channel * ratio).toString(16).padStart(2, '0'))
+                .join('')}`;
+        }
+
+        function getBrandIcon(brandSlug) {
+            return brandSlug && BRAND_ICONS[brandSlug] ? BRAND_ICONS[brandSlug] : null;
+        }
+
+        function resolveProviderBrand(providerId) {
+            if (PROVIDER_BRANDS[providerId]) {
+                return PROVIDER_BRANDS[providerId];
+            }
+
+            // LiteLLM keeps adding suffixed variants of providers we already know, so a
+            // new vertex_ai-*/bedrock_* entry inherits its parent's mark instead of
+            // dropping back to initials.
+            const parentId = Object.keys(PROVIDER_BRANDS)
+                .filter(id => providerId.startsWith(`${id}-`) || providerId.startsWith(`${id}_`))
+                .sort((left, right) => right.length - left.length)[0];
+
+            return parentId ? PROVIDER_BRANDS[parentId] : '';
+        }
+
+        function resolveModelBrand(modelKey) {
+            const normalizedKey = modelKey.toLowerCase();
+            const rule = MODEL_BRANDS.find(([pattern]) => pattern.test(normalizedKey));
+            return rule ? rule[1] : '';
+        }
+
+        // Glyph markup ships with the page, so it is inlined as-is rather than escaped.
+        function renderBrandGlyph(brandSlug, className, useBrandColor) {
+            const icon = getBrandIcon(brandSlug);
+            if (!icon) {
+                return '';
+            }
+
+            const tint = useBrandColor && icon.color ? ` style="color: ${icon.color}"` : '';
+            return `<svg class="${className}" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"${tint} aria-hidden="true">${icon.path}</svg>`;
+        }
+
+        function buildProviderLogoStyle(providerId, brandSlug) {
+            const icon = getBrandIcon(brandSlug);
+            if (icon && icon.color) {
+                return `background: linear-gradient(135deg, ${icon.color}, ${shadeHexColor(icon.color, 0.82)});`;
+            }
+
             const hue = hashString(providerId) % 360;
             const secondHue = (hue + 38) % 360;
             return `background: linear-gradient(135deg, hsl(${hue}, 72%, 54%), hsl(${secondHue}, 68%, 42%));`;
@@ -1670,6 +1856,7 @@
                         value="${escapeHtml(provider.id)}"
                         ${draftProviderFilter.has(provider.id) ? 'checked' : ''}
                     >
+                    ${renderBrandGlyph(provider.brandSlug, 'model-filter-option-brand', true)}
                     <div class="model-filter-option-main">
                         <span>${escapeHtml(provider.name)}</span>
                         <span class="model-filter-option-provider">${escapeHtml(provider.id)} · ${escapeHtml(provider.categoryLabel)} · ${provider.models.length} 个模型</span>
@@ -1697,6 +1884,7 @@
 
             container.innerHTML = activeProviders.map(provider => `
                 <button class="toolbar-filter-chip" type="button" data-remove-provider-filter="${escapeHtml(provider.id)}" aria-label="移除 ${escapeHtml(provider.name)} 厂家过滤">
+                    ${renderBrandGlyph(provider.brandSlug, 'toolbar-filter-chip-brand', true)}
                     <span>${escapeHtml(provider.name)}</span>
                     <span class="toolbar-filter-chip-close" aria-hidden="true">×</span>
                 </button>
@@ -1813,6 +2001,7 @@
                 results.innerHTML = stagedModels.map(model => `
                     <label class="model-filter-option">
                         <input type="checkbox" data-model-filter-option="true" value="${escapeHtml(model.normalizedKey)}" checked>
+                        ${renderBrandGlyph(model.brandSlug, 'model-filter-option-brand', true)}
                         <div class="model-filter-option-main">
                             <span class="model-key mono">${escapeHtml(model.key)}</span>
                             <span class="model-filter-option-provider">${escapeHtml(model.providerName)}</span>
@@ -1840,6 +2029,7 @@
                         value="${escapeHtml(model.normalizedKey)}"
                         ${draftModelIdFilter.has(model.normalizedKey) ? 'checked' : ''}
                     >
+                    ${renderBrandGlyph(model.brandSlug, 'model-filter-option-brand', true)}
                     <div class="model-filter-option-main">
                         <span class="model-key mono">${escapeHtml(model.key)}</span>
                         <span class="model-filter-option-provider">${escapeHtml(model.providerName)}</span>
@@ -2033,6 +2223,7 @@
                 hasInputPrice: hasInputTokenPrice || hasRequestPrice,
                 hasOutputPrice: outputUsd > 0,
                 isTiered: pricing.isTiered,
+                brandSlug: resolveModelBrand(modelKey),
                 normalizedKey: modelKey.toLowerCase(),
                 searchText: `${providerId} ${modelKey} ${buildDisplayName(modelKey, providerId)}`.toLowerCase()
             };
@@ -2051,13 +2242,16 @@
                 const normalizedModel = normalizeModel(modelKey, entry);
 
                 if (!groupedProviders.has(providerId)) {
+                    const brandSlug = resolveProviderBrand(providerId);
+
                     groupedProviders.set(providerId, {
                         id: providerId,
                         name: humanizeProviderId(providerId),
                         category: category.id,
                         categoryLabel: category.label,
+                        brandSlug,
                         logoText: buildProviderLogoText(providerId),
-                        logoStyle: buildProviderLogoStyle(providerId),
+                        logoStyle: buildProviderLogoStyle(providerId, brandSlug),
                         searchText: `${providerId} ${humanizeProviderId(providerId)}`.toLowerCase(),
                         models: []
                     });
@@ -2234,10 +2428,21 @@
 
         function renderCard(provider) {
             const isCollapsed = isProviderCardCollapsed(provider.id);
+            // Only reserve the glyph slot on cards that actually show marks, so the ids
+            // line up inside a mixed card without indenting cards that show none.
+            const showsBrandMarks = provider.models.some(model => getBrandIcon(model.brandSlug));
             const modelRows = provider.models.map(model => {
                 const inputBarWidth = !model.hasInputTokenPrice || maxInputPrice === 0 ? 0 : (model.inputPrice / maxInputPrice * 100);
                 const outputBarWidth = !model.hasOutputPrice || maxOutputPrice === 0 ? 0 : (model.outputPrice / maxOutputPrice * 100);
                 const suffix = model.isTiered ? ' 起' : '';
+
+                const brandIcon = getBrandIcon(model.brandSlug);
+                // The mark rides the model-id line: that line already breaks anywhere, so
+                // the glyph never gets orphaned and the model name keeps its full width.
+                const brandGlyph = showsBrandMarks
+                    ? renderBrandGlyph(model.brandSlug, 'model-brand-icon', true)
+                        || '<span class="model-brand-icon" aria-hidden="true"></span>'
+                    : '';
 
                 let inputPriceHtml;
                 let outputPriceHtml;
@@ -2281,7 +2486,7 @@
                         </td>
                         <td>
                             <span class="model-name">${escapeHtml(model.name)}</span>
-                            <span class="model-key mono">${escapeHtml(model.key)}</span>
+                            <span class="model-key mono"${brandIcon ? ` title="${escapeHtml(brandIcon.name)}"` : ''}>${brandGlyph}${escapeHtml(model.key)}</span>
                         </td>
                         <td>${inputPriceHtml}</td>
                         <td>${outputPriceHtml}</td>
@@ -2294,7 +2499,7 @@
                 <div class="provider-card ${isCollapsed ? 'collapsed' : ''}" data-category="${escapeHtml(provider.category)}" data-provider="${escapeHtml(provider.id)}">
                     <div class="card-header">
                         <div class="card-header-main">
-                            <div class="provider-logo" style="${provider.logoStyle}">${escapeHtml(provider.logoText)}</div>
+                            <div class="provider-logo" style="${provider.logoStyle}">${renderBrandGlyph(provider.brandSlug, 'provider-logo-glyph', false) || escapeHtml(provider.logoText)}</div>
                             <div class="provider-info">
                                 <div class="provider-name">${escapeHtml(provider.name)}</div>
                                 <div class="provider-category">${escapeHtml(provider.categoryLabel)}</div>
