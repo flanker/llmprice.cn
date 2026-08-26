@@ -2340,14 +2340,15 @@
             grid.innerHTML = providersData.map(renderCard).join('');
         }
 
-        function updateVisibleModelCount(card, visibleModelCount) {
+        function updateVisibleModelCount(card, visibleModelCount, isNarrowed) {
             const counter = card.querySelector('[data-model-count]');
-            const totalCount = Number(counter?.dataset.modelCount || 0);
             if (!counter) {
                 return;
             }
 
-            counter.textContent = activeModelIdFilter.size > 0
+            const totalCount = Number(counter.dataset.modelCount || 0);
+
+            counter.textContent = isNarrowed
                 ? `${visibleModelCount} / ${totalCount} 个模型`
                 : `${totalCount} 个模型`;
         }
@@ -2364,43 +2365,35 @@
                 const providerSearchText = provider ? provider.searchText : '';
                 const providerId = card.dataset.provider || '';
                 const rows = Array.from(card.querySelectorAll('tbody tr'));
+
+                // A term that matches the provider itself (id or 中文名) keeps all of its models;
+                // any other term narrows the rows instead of only tinting them.
+                const providerMatchesSearch = Boolean(searchTerm) && providerSearchText.includes(searchTerm);
+                const searchNarrowsRows = Boolean(searchTerm) && !providerMatchesSearch;
+
                 const visibleRows = rows.filter(row => {
+                    const modelName = row.dataset.modelName || '';
                     const matchModelId = activeModelIdFilter.size === 0 || activeModelIdFilter.has(row.dataset.modelKeyNormalized || '');
-                    row.classList.toggle('model-row-hidden', !matchModelId);
+                    const matchSearch = !searchNarrowsRows || modelName.includes(searchTerm);
+                    const isVisible = matchModelId && matchSearch;
 
-                    if (!matchModelId) {
-                        row.style.background = '';
-                    }
+                    row.classList.toggle('model-row-hidden', !isVisible);
+                    // Only worth highlighting when the rows were not narrowed - otherwise every
+                    // visible row matches and tinting all of them says nothing.
+                    row.style.background = isVisible && providerMatchesSearch && modelName.includes(searchTerm)
+                        ? 'var(--accent-blue-light)'
+                        : '';
 
-                    return matchModelId;
+                    return isVisible;
                 });
-                const modelNames = visibleRows.map(element => element.dataset.modelName);
+
                 const categoryMatch = activeFilter === 'all' || category === activeFilter;
                 const providerFilterMatch = activeProviderFilter.size === 0 || activeProviderFilter.has(providerId);
                 const hasVisibleRows = visibleRows.length > 0;
-                let searchMatch = true;
 
-                if (searchTerm) {
-                    const providerMatch = providerSearchText.includes(searchTerm);
-                    const modelMatch = modelNames.some(name => name.includes(searchTerm));
-                    searchMatch = providerMatch || modelMatch;
+                updateVisibleModelCount(card, visibleRows.length, activeModelIdFilter.size > 0 || searchNarrowsRows);
 
-                    rows.forEach(row => {
-                        const modelName = row.dataset.modelName;
-                        const isVisible = !row.classList.contains('model-row-hidden');
-                        row.style.background = isVisible && modelName && modelName.includes(searchTerm)
-                            ? 'var(--accent-blue-light)'
-                            : '';
-                    });
-                } else {
-                    rows.forEach(row => {
-                        row.style.background = '';
-                    });
-                }
-
-                updateVisibleModelCount(card, visibleRows.length);
-
-                if (categoryMatch && providerFilterMatch && searchMatch && hasVisibleRows) {
+                if (categoryMatch && providerFilterMatch && hasVisibleRows) {
                     card.classList.remove('hidden');
                     visibleCount += 1;
                 } else {
