@@ -1,11 +1,6 @@
 plugins:
-  - jekyll-remote-theme
   - jekyll-seo-tag
   - jekyll-sitemap
-
-remote_theme: jekyll/minima
-minima:
-  skin: solarized
 
 # jekyll-seo-tag and jekyll-sitemap both need an absolute base to build
 # canonical URLs and sitemap entries from.

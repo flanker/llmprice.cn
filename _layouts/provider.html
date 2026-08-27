@@ -1,0 +1,62 @@
+---
+layout: catalog
+---
+<div class="table-scroll">
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">模型</th>
+                <th scope="col">输入价格</th>
+                <th scope="col">输出价格</th>
+                <th scope="col">上下文</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%- for row in page.rows %}
+            <tr>
+                <td>
+                    {%- if row.compare_slug != '' -%}
+                    <a href="{{ '/m/' | append: row.compare_slug | append: '/' | relative_url }}">{{ row.model }}</a>
+                    {%- else -%}
+                    <strong>{{ row.model }}</strong>
+                    {%- endif -%}
+                    {%- unless row.key == row.model %}<span class="model-key">{{ row.key }}</span>{% endunless -%}
+                </td>
+                <td>
+                    {%- if row.input -%}
+                    <span class="price-in">{{ row.input }} 元</span>
+                    <span class="price-usd">(${{ row.input_usd }})</span>
+                    {%- else -%}<span class="price-none">暂无</span>{%- endif -%}
+                </td>
+                <td>
+                    {%- if row.output -%}
+                    <span class="price-out">{{ row.output }} 元</span>
+                    <span class="price-usd">(${{ row.output_usd }})</span>
+                    {%- else -%}<span class="price-none">暂无</span>{%- endif -%}
+                </td>
+                <td><span class="ctx">{{ row.context }}</span></td>
+            </tr>
+            {%- endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>其他厂商价格</h2>
+<div class="link-cloud">
+    {%- for p in site.data.catalog.providers limit: 48 -%}
+    {%- unless p.id == page.provider_id %}
+    <a href="{{ '/p/' | append: p.id | append: '/' | relative_url }}">{{ p.name }} · {{ p.count }} 个模型</a>
+    {%- endunless -%}
+    {%- endfor %}
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "大模型价格对比", "item": "{{ site.url }}/"},
+    {"@type": "ListItem", "position": 2, "name": {{ page.provider_name | jsonify }}, "item": "{{ site.url }}{{ page.permalink }}"}
+  ]
+}
+</script>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {%- seo -%}
+    {%- include google-analytics.html -%}
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563eb'/%3E%3Cpath d='M18 20h10v24h18v8H18z' fill='white'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ '/assets/pages.css' | relative_url }}">
+</head>
+<body>
+    <header class="page-head">
+        <div class="wrap">
+            <nav class="crumbs">
+                <a href="{{ '/' | relative_url }}">大模型价格对比</a> ›
+                {{ page.crumb }}
+            </nav>
+            <h1>{{ page.heading }}</h1>
+            <p class="lede">{{ page.lede }}</p>
+        </div>
+    </header>
+
+    <main class="wrap">
+        {{ content }}
+
+        <p class="note">
+            价格单位为 元/百万 Token，按 $1 = ¥7 换算，数据取自
+            <a href="https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json" rel="nofollow noreferrer" target="_blank">LiteLLM 官方成本表</a>，
+            每日更新。标注「暂无」表示 LiteLLM 未收录该项价格（上游记为 0），并不代表免费，请以厂商官方定价为准。
+            完整目录见 <a href="{{ '/' | relative_url }}">首页实时价格表</a>。
+        </p>
+    </main>
+</body>
+</html>
