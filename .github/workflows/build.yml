@@ -12,6 +12,10 @@ name: build
 on:
   push:
     branches: [master]
+  # Build (but do not deploy) on PRs, so a change to the generator, the
+  # layouts or this workflow is proven before it reaches master rather than
+  # the first time it deploys.
+  pull_request:
   schedule:
     # Prices move upstream without anything happening in this repo, so rebuild
     # daily to keep the pre-rendered pages in step with LiteLLM.
@@ -24,7 +28,9 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  # Deploys must not overlap; PR builds are per-ref so they neither queue
+  # behind a deploy nor cancel one.
+  group: pages-${{ github.event_name == 'push' && 'production' || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -52,6 +58,7 @@ jobs:
 
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
