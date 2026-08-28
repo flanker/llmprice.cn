@@ -1,0 +1,68 @@
+# Builds and deploys the site, regenerating the pre-rendered catalogue first.
+#
+# This replaces GitHub Pages' built-in Jekyll build. That build runs in safe
+# mode and cannot reach the network, so it can neither run tools/build-pages.py
+# nor fetch the LiteLLM cost map — which is exactly what pre-rendering needs.
+#
+# After merging, switch the repository's Pages source to GitHub Actions
+# (Settings → Pages → Build and deployment → Source), otherwise the old
+# built-in build keeps deploying and the generated pages never ship.
+name: build
+
+on:
+  push:
+    branches: [master]
+  # Build (but do not deploy) on PRs, so a change to the generator, the
+  # layouts or this workflow is proven before it reaches master rather than
+  # the first time it deploys.
+  pull_request:
+  schedule:
+    # Prices move upstream without anything happening in this repo, so rebuild
+    # daily to keep the pre-rendered pages in step with LiteLLM.
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  # Deploys must not overlap; PR builds are per-ref so they neither queue
+  # behind a deploy nor cancel one.
+  group: pages-${{ github.event_name == 'push' && 'production' || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Generate provider and model pages
+        run: python3 tools/build-pages.py
+
+      - name: Build site
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

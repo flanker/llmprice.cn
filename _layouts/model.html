@@ -1,0 +1,59 @@
+---
+layout: catalog
+---
+<div class="table-scroll">
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">厂商</th>
+                <th scope="col">输入价格</th>
+                <th scope="col">输出价格</th>
+                <th scope="col">上下文</th>
+            </tr>
+        </thead>
+        <tbody>
+            {%- for row in page.rows %}
+            <tr{% if forloop.first and row.input %} class="best"{% endif %}>
+                <td>
+                    <a href="{{ '/p/' | append: row.provider_id | append: '/' | relative_url }}">{{ row.provider_name }}</a>
+                    {%- if forloop.first and row.input %} <span class="best-flag">最低</span>{% endif -%}
+                    <span class="model-key">{{ row.key }}</span>
+                </td>
+                <td>
+                    {%- if row.input -%}
+                    <span class="price-in">{{ row.input }} 元</span>
+                    <span class="price-usd">(${{ row.input_usd }})</span>
+                    {%- else -%}<span class="price-none">暂无</span>{%- endif -%}
+                </td>
+                <td>
+                    {%- if row.output -%}
+                    <span class="price-out">{{ row.output }} 元</span>
+                    <span class="price-usd">(${{ row.output_usd }})</span>
+                    {%- else -%}<span class="price-none">暂无</span>{%- endif -%}
+                </td>
+                <td><span class="ctx">{{ row.context }}</span></td>
+            </tr>
+            {%- endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>其他常被对比的模型</h2>
+<div class="link-cloud">
+    {%- for m in site.data.catalog.models limit: 48 -%}
+    {%- unless m.name == page.model_name %}
+    <a href="{{ '/m/' | append: m.slug | append: '/' | relative_url }}">{{ m.name }} · {{ m.providers }} 家</a>
+    {%- endunless -%}
+    {%- endfor %}
+</div>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "大模型价格对比", "item": "{{ site.url }}/"},
+    {"@type": "ListItem", "position": 2, "name": {{ page.model_name | jsonify }}, "item": "{{ site.url }}{{ page.permalink }}"}
+  ]
+}
+</script>

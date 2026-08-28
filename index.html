@@ -1274,6 +1274,45 @@ description: >-
             font-size: 1.1rem;
         }
 
+        .catalog-links {
+            margin: 56px auto 8px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .catalog-links h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 24px 0 12px;
+        }
+
+        .catalog-link-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .catalog-link-cloud a {
+            padding: 5px 11px;
+            border: 1px solid var(--border-color);
+            border-radius: 100px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .catalog-link-cloud a:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .catalog-link-cloud a span {
+            color: var(--text-tertiary);
+        }
+
         @media (max-width: 900px) {
             .card-grid {
                 grid-template-columns: 1fr;
@@ -1576,6 +1615,26 @@ description: >-
                 <p>没有找到匹配的 provider 或模型</p>
             </div>
         </div>
+        <!-- Static link graph into the pre-rendered pages. The grid above is
+             built by JS, so without this a crawler reaching the homepage finds
+             no path to any of the provider or model pages, and the sitemap is
+             the only way in. These links are also how a reader gets to a single
+             model's cross-provider comparison. -->
+        <nav class="catalog-links container">
+            <h2>按厂商查看价格</h2>
+            <div class="catalog-link-cloud">
+                {%- for p in site.data.catalog.providers -%}
+                <a href="{{ '/p/' | append: p.id | append: '/' | relative_url }}">{{ p.name }} <span>{{ p.count }}</span></a>
+                {%- endfor -%}
+            </div>
+
+            <h2>热门模型跨厂商比价</h2>
+            <div class="catalog-link-cloud">
+                {%- for m in site.data.catalog.models limit: 120 -%}
+                <a href="{{ '/m/' | append: m.slug | append: '/' | relative_url }}">{{ m.name }} <span>{{ m.providers }} 家</span></a>
+                {%- endfor -%}
+            </div>
+        </nav>
     </main>
 
     <footer>
