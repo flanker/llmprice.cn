@@ -65,6 +65,7 @@
   [https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json](https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json)
 - LiteLLM backup cost map:
   [https://github.com/BerriAI/litellm/blob/main/litellm/model_prices_and_context_window_backup.json](https://github.com/BerriAI/litellm/blob/main/litellm/model_prices_and_context_window_backup.json)
+- [AIHOT API 价格对比](https://aihot.news/leaderboard/prices)：独立对照页面，可按输入、输出和缓存命中价格排序。
 
 ## 问题
 
